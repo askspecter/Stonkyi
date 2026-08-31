@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Build output
+contracts/cache/
+contracts/artifacts/
+contracts/typechain-types/
+web/.next/
+web/out/
+
+# Env / secrets
+.env
+.env.local
+
+# OS / editor
+.DS_Store
+*.tsbuildinfo

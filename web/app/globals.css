@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+}
+
+html,
+body {
+  background-color: #0a0e0a;
+  color: #d6f5c9;
+}
+
+body {
+  background-image:
+    radial-gradient(60rem 60rem at 80% -10%, rgba(125, 255, 77, 0.08), transparent 60%),
+    radial-gradient(50rem 50rem at -10% 20%, rgba(255, 213, 74, 0.05), transparent 55%),
+    linear-gradient(#0a0e0a, #0a0e0a);
+  min-height: 100vh;
+}
+
+/* Faint scanline / grid texture */
+.grid-bg {
+  background-image:
+    linear-gradient(rgba(125, 255, 77, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(125, 255, 77, 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.acid-text {
+  color: #7dff4d;
+  text-shadow: 0 0 18px rgba(125, 255, 77, 0.35);
+}
+
+.panel {
+  background: rgba(15, 22, 16, 0.75);
+  border: 1px solid #1c2a1c;
+  backdrop-filter: blur(6px);
+}
+
+.btn-acid {
+  background: #7dff4d;
+  color: #06210a;
+  font-weight: 700;
+  transition: transform 0.08s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+.btn-acid:hover:not(:disabled) {
+  box-shadow: 0 0 24px rgba(125, 255, 77, 0.45);
+  filter: brightness(1.05);
+}
+.btn-acid:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.btn-acid:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+::selection {
+  background: rgba(125, 255, 77, 0.3);
+}
