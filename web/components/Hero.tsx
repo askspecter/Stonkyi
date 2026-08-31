@@ -1,11 +1,20 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { SupplyStat } from "./SupplyStat";
 
 export function Hero() {
   return (
     <section className="grid-bg relative overflow-hidden rounded-lg border border-line panel px-6 py-14 sm:px-10">
+      <Image
+        src="/logo.png"
+        alt="StonkInu broker"
+        width={280}
+        height={280}
+        priority
+        className="pointer-events-none absolute -right-6 -top-6 hidden w-56 rotate-6 rounded-xl opacity-90 shadow-glow lg:block xl:w-72"
+      />
       <div className="relative z-10 max-w-2xl">
         <span className="inline-block rounded-full border border-line bg-ink/60 px-3 py-1 text-[11px] uppercase tracking-widest text-acid">
           ▸ Clock in. Get paid in stock.

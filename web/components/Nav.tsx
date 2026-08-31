@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 
@@ -16,9 +17,14 @@ export function Nav() {
     <header className="sticky top-0 z-30 border-b border-line bg-ink/80 backdrop-blur">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3">
         <Link href="/" className="flex items-center gap-2">
-          <span className="grid h-8 w-8 place-items-center rounded-sm bg-acid text-lg font-black text-ink shadow-glow">
-            S
-          </span>
+          <Image
+            src="/logo.png"
+            alt="StonkInu"
+            width={32}
+            height={32}
+            priority
+            className="h-8 w-8 rounded-sm shadow-glow"
+          />
           <span className="text-lg font-black tracking-tight acid-text">
             STONK<span className="text-gold">INU</span>
           </span>

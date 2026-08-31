@@ -30,15 +30,45 @@ async function main() {
   const stock = await StockToken.deploy("StonkInu Tokenized Stock", "sSTOCK", deployer.address);
   await stock.waitForDeployment();
 
-  const MockStockBuyer = await ethers.getContractFactory("MockStockBuyer");
-  const buyer = await MockStockBuyer.deploy(
-    await stock.getAddress(),
-    STOCK_PER_ETH,
-    treasury,
-    deployer.address
-  );
-  await buyer.waitForDeployment();
-  await (await stock.setMinter(await buyer.getAddress(), true)).wait();
+  // Choose the ETH -> stock adapter. If a real Uniswap V3 router + WETH are
+  // provided via env, use the production UniswapV3StockBuyer against a live
+  // WETH/stock pool; otherwise fall back to the self-contained mock.
+  const UNISWAP_ROUTER = process.env.UNISWAP_ROUTER || "";
+  const WETH = process.env.WETH || "";
+  const POOL_FEE = Number(process.env.POOL_FEE || "3000"); // 0.3% tier
+  const MIN_STOCK_PER_ETH = process.env.MIN_STOCK_PER_ETH
+    ? ethers.parseEther(process.env.MIN_STOCK_PER_ETH)
+    : 0n;
+
+  let buyer;
+  let buyerKind;
+  if (UNISWAP_ROUTER && WETH) {
+    const Buyer = await ethers.getContractFactory("UniswapV3StockBuyer");
+    buyer = await Buyer.deploy(
+      await stock.getAddress(),
+      WETH,
+      UNISWAP_ROUTER,
+      POOL_FEE,
+      MIN_STOCK_PER_ETH,
+      deployer.address
+    );
+    await buyer.waitForDeployment();
+    buyerKind = "UniswapV3StockBuyer";
+    console.log(`Using UniswapV3StockBuyer (router ${UNISWAP_ROUTER}, WETH ${WETH}, fee ${POOL_FEE})`);
+  } else {
+    const MockStockBuyer = await ethers.getContractFactory("MockStockBuyer");
+    buyer = await MockStockBuyer.deploy(
+      await stock.getAddress(),
+      STOCK_PER_ETH,
+      treasury,
+      deployer.address
+    );
+    await buyer.waitForDeployment();
+    // The mock mints the stock it delivers, so grant it minter rights.
+    await (await stock.setMinter(await buyer.getAddress(), true)).wait();
+    buyerKind = "MockStockBuyer";
+    console.log("Using MockStockBuyer (set UNISWAP_ROUTER + WETH env for the real buyer)");
+  }
 
   const Registry = await ethers.getContractFactory("ERC6551Registry");
   const registry = await Registry.deploy();
@@ -64,7 +94,8 @@ async function main() {
     chainId,
     StonkInu: await stonkInu.getAddress(),
     StockToken: await stock.getAddress(),
-    MockStockBuyer: await buyer.getAddress(),
+    StockBuyer: await buyer.getAddress(),
+    stockBuyerKind: buyerKind,
     ERC6551Registry: await registry.getAddress(),
     ERC6551Account: await accountImpl.getAddress(),
     StonkInuBroker: await broker.getAddress(),

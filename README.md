@@ -45,7 +45,9 @@ The **0.002 ETH fee is split automatically, on-chain**:
 | --- | --- |
 | `StonkInu.sol` | `$STONKINU` — ERC-20 (burnable, permit). Fixed genesis supply, burn-only thereafter. |
 | `StockToken.sol` | The tokenized stock distributed to holders. |
-| `IStockBuyer` / `MockStockBuyer.sol` | Pluggable ETH → stock adapter. The mock mints stock at a fixed rate (self-contained for dev/testnets); swap for a Uniswap-router-backed buyer on mainnet. |
+| `IStockBuyer` | Pluggable ETH → stock adapter interface — the broker doesn't care how stock is sourced. |
+| `UniswapV3StockBuyer.sol` | **Production adapter.** Wraps ETH → WETH and swaps WETH → stock through a Uniswap V3 pool (`exactInputSingle`), with a configurable `minStockPerEth` slippage floor. |
+| `MockStockBuyer.sol` | Self-contained adapter for local dev / testnets — mints stock at a fixed rate so no live pool is required. |
 | `StonkInuBroker.sol` | The 999-supply ERC-721 collection. Mint logic, automatic fee split, dividend distribution, pull-based `claim()`, and ERC-6551 account creation. |
 | `erc6551/ERC6551Registry.sol` | Deterministic token-bound account registry (canonical bytecode layout, plain-Solidity implementation). |
 | `erc6551/ERC6551Account.sol` | The token-bound account: owned by the current NFT owner, can execute calls, hold assets, and validate signatures (ERC-1271). |
@@ -77,6 +79,19 @@ Deploy to Sepolia:
 
 ```bash
 export SEPOLIA_RPC_URL=... PRIVATE_KEY=... TREASURY=...
+npm run deploy:sepolia
+```
+
+**Using the real Uniswap V3 buyer.** By default the deploy script uses
+`MockStockBuyer`. Provide a router + WETH (and optionally a pool fee tier and
+slippage floor) to deploy `UniswapV3StockBuyer` against a live WETH/stock pool
+instead:
+
+```bash
+export UNISWAP_ROUTER=0xE592427A0AEce92De3Edee1F18E0157C05861564  # V3 SwapRouter
+export WETH=0x...            # WETH9 for the target chain
+export POOL_FEE=3000         # 0.3% tier (optional, default 3000)
+export MIN_STOCK_PER_ETH=0   # slippage floor, stock per ETH (optional)
 npm run deploy:sepolia
 ```
 

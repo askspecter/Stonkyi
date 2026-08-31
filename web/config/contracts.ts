@@ -11,7 +11,8 @@ export type Deployment = {
   chainId: number;
   StonkInu: `0x${string}`;
   StockToken: `0x${string}`;
-  MockStockBuyer: `0x${string}`;
+  StockBuyer: `0x${string}`;
+  stockBuyerKind?: string;
   ERC6551Registry: `0x${string}`;
   ERC6551Account: `0x${string}`;
   StonkInuBroker: `0x${string}`;

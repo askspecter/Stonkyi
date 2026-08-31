@@ -9,6 +9,13 @@ export const metadata: Metadata = {
   title: "StonkInu — 999 Broker NFTs",
   description:
     "999 broker NFTs, each with its own ERC-6551 wallet. Burn $STONKINU, mint a broker, and earn tokenized stock on every mint — automatically.",
+  icons: { icon: "/logo.png" },
+  openGraph: {
+    title: "StonkInu — 999 Broker NFTs",
+    description:
+      "Burn $STONKINU, mint a broker, earn tokenized stock automatically.",
+    images: ["/logo.png"],
+  },
 };
 
 export default function RootLayout({
