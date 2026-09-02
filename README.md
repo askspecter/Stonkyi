@@ -105,6 +105,22 @@ npm run dev                  # http://localhost:3000
 ```
 
 Set `NEXT_PUBLIC_CHAIN_ID` to `31337` for local Hardhat or `11155111` for Sepolia.
+
+#### Deploying to Vercel
+
+The Next.js app lives in the `web/` subfolder, so Vercel must be told where it
+is — otherwise every route 404s:
+
+1. Import the repo in Vercel.
+2. **Project Settings → General → Root Directory → set to `web`** (this is the
+   fix for a 404 on a fresh deploy). Framework preset: **Next.js**.
+3. Add env vars: `NEXT_PUBLIC_WALLETCONNECT_ID`, and `NEXT_PUBLIC_CHAIN_ID`
+   (e.g. `11155111`).
+4. Deploy.
+
+The `/nft/metadata/[id]` route is server-rendered and reads the metadata files
+in `web/data/nft-metadata/`; `next.config.mjs` traces those into the function
+bundle so they resolve in production.
 The frontend reads contract addresses from `web/config/deployments/<chainId>.json`,
 which the deploy script generates.
 
