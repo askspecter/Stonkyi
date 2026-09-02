@@ -72,24 +72,35 @@ function outlineRegion(c) {
   for (const [x, y] of pts) if (!c.get(x, y)) c.set(x, y, OUTLINE);
 }
 
-// ── Head (rows 1-14) ─────────────────────────────────────────────────────────
+// ── Head (rows 0-15) — Shiba Inu: big triangular ears, wide cream muzzle ──────
 function drawHead(c, fur) {
   const F = fur.base, S = fur.shadow, M = fur.muzzle;
-  // Ears (pointed)
-  for (const ex of [8, 17]) {
-    c.set(ex + 1, 1, F);
-    c.rect(ex, 2, ex + 2, 4, F);
-    c.set(ex + 1, 3, S);
-  }
+  // Big pointed Shiba ears (triangles) with cream inner.
+  // Left ear
+  c.set(8, 0, F);
+  c.rect(7, 1, 9, 1, F);
+  c.rect(6, 2, 10, 4, F);
+  c.rect(8, 2, 9, 3, M); // inner ear
+  c.set(8, 3, S);
+  // Right ear (mirror)
+  c.set(19, 0, F);
+  c.rect(18, 1, 20, 1, F);
+  c.rect(17, 2, 21, 4, F);
+  c.rect(18, 2, 19, 3, M);
+  c.set(19, 3, S);
   // Head (rounded block)
   c.rect(9, 4, 18, 4, F);
-  c.rect(8, 5, 19, 12, F);
-  c.rect(9, 13, 18, 13, F);
-  c.rect(18, 6, 18, 12, S); // right-side shadow
-  // Muzzle
-  c.rect(10, 10, 17, 13, M);
-  c.rect(11, 9, 16, 9, M);
-  c.set(8, 11, M); c.set(19, 11, M);
+  c.rect(8, 5, 19, 9, F);
+  c.rect(9, 10, 18, 13, F);
+  c.rect(18, 5, 18, 8, S); // right cheek shadow
+  // Cream eyebrow dots (classic Shiba markings)
+  c.rect(9, 6, 10, 6, M);
+  c.rect(17, 6, 18, 6, M);
+  // Wide cream muzzle that flares out to the cheeks
+  c.rect(10, 9, 17, 14, M);
+  c.rect(9, 10, 18, 13, M);
+  c.rect(8, 11, 8, 13, M); c.rect(19, 11, 19, 13, M); // cheek flare
+  c.set(7, 12, M); c.set(20, 12, M);
   outlineRegion(c);
 }
 
@@ -109,8 +120,11 @@ const EYE = {
 };
 
 function drawNoseMouth(c) {
-  c.rect(13, 11, 14, 12, OUTLINE); // nose
-  c.set(12, 13, OUTLINE); c.rect(13, 13, 14, 13, OUTLINE); c.set(15, 13, OUTLINE); // smile
+  c.rect(13, 10, 14, 11, OUTLINE); // nose
+  c.rect(13, 12, 14, 12, OUTLINE); // philtrum
+  // Shiba smile — two curves drooping from the philtrum
+  c.set(12, 13, OUTLINE); c.set(11, 12, OUTLINE);
+  c.set(15, 13, OUTLINE); c.set(16, 12, OUTLINE);
 }
 
 // ── Body (rows 14-27): jacket + shirt + wide tie + cuffs ─────────────────────
