@@ -41,8 +41,8 @@ const TIE = [
   ["Pink", 8, "#E876B0"], ["Orange", 8, "#E8822E"], ["Silver", 5, "#C7CDD4"], ["Rainbow", 3, "__rainbow__"],
 ];
 const EYES = [
-  ["Sunglasses", 30, "sunglasses"], ["Normal", 20, "normal"], ["Angry", 14, "angry"],
-  ["3D", 10, "threeD"], ["Stonk", 9, "stonk"], ["Wide", 8, "wide"], ["Laser", 5, "laser"], ["Visor", 4, "visor"],
+  ["Stonk", 24, "stonk"], ["Sunglasses", 20, "sunglasses"], ["Normal", 16, "normal"],
+  ["Angry", 12, "angry"], ["3D", 9, "threeD"], ["Wide", 8, "wide"], ["Laser", 6, "laser"], ["Visor", 4, "visor"],
 ];
 const HAT = [
   ["None", 30, "none"], ["Cap", 16, "cap"], ["Fedora", 12, "fedora"], ["Beanie", 11, "beanie"],
@@ -72,35 +72,36 @@ function outlineRegion(c) {
   for (const [x, y] of pts) if (!c.get(x, y)) c.set(x, y, OUTLINE);
 }
 
-// ── Head (rows 2-16) — Shiba Inu, lowered with top breathing room ────────────
+// ── Head (rows 2-16) — StonkInu logo face: dark head, big scalloped cream
+//    muzzle, cream brow marks + ear carets ─────────────────────────────────────
 function drawHead(c, fur) {
   const F = fur.base, S = fur.shadow, M = fur.muzzle;
-  // Big triangular Shiba ears with dark edge + cream inner.
+  // Ears: fur triangle with a cream caret inner (logo style)
   // Left ear (cols 6-10)
   c.set(8, 2, F);
   c.rect(7, 3, 9, 3, F);
-  c.rect(6, 4, 10, 5, F);
-  c.rect(8, 4, 8, 5, M); // inner ear
-  c.set(8, 4, S);
-  // Right ear (cols 17-21, mirror)
+  c.rect(6, 4, 10, 6, F);
+  c.set(8, 4, M); c.set(9, 5, M); // inner caret
+  // Right ear (cols 17-21)
   c.set(19, 2, F);
   c.rect(18, 3, 20, 3, F);
-  c.rect(17, 4, 21, 5, F);
-  c.rect(19, 4, 19, 5, M);
-  c.set(19, 4, S);
-  // Head (rounded block)
+  c.rect(17, 4, 21, 6, F);
+  c.set(19, 4, M); c.set(18, 5, M);
+  // Head (rounded, wide)
   c.rect(9, 5, 18, 5, F);
-  c.rect(8, 6, 19, 15, F);
-  c.rect(10, 16, 17, 16, F);
-  c.rect(19, 7, 19, 11, S); // right cheek shadow
-  // Cream eyebrow dots (classic Shiba markings), above the eyes
-  c.rect(9, 8, 10, 8, M);
-  c.rect(17, 8, 18, 8, M);
-  // Cream muzzle framed by fur, flaring into blush cheeks
-  c.rect(10, 11, 17, 16, M);
-  c.rect(9, 12, 18, 15, M);
-  c.rect(8, 13, 8, 15, M); c.rect(19, 13, 19, 15, M); // cheek flare
-  c.set(7, 14, M); c.set(20, 14, M);
+  c.rect(7, 6, 20, 15, F);
+  c.rect(8, 16, 19, 16, F);
+  c.rect(20, 8, 20, 12, S); // right cheek shadow
+  // Cream brow marks (small diamonds) on the dark forehead
+  c.set(10, 6, M); c.set(9, 7, M); c.set(11, 7, M); c.set(10, 8, M);
+  c.set(17, 6, M); c.set(16, 7, M); c.set(18, 7, M); c.set(17, 8, M);
+  // Big cream muzzle / cheeks, rising around the eyes
+  c.rect(9, 11, 18, 15, M);
+  c.rect(8, 12, 19, 15, M);
+  c.set(7, 13, M); c.set(20, 13, M); c.set(7, 14, M); c.set(20, 14, M); // flare
+  c.rect(9, 10, 10, 10, M); c.rect(17, 10, 18, 10, M); // rise around eyes
+  // Scalloped chin (fluffy bumps along the bottom)
+  for (const x of [9, 11, 13, 15, 17]) c.set(x, 16, M);
   outlineRegion(c);
 }
 
@@ -120,8 +121,10 @@ const EYE = {
 };
 
 function drawNoseMouth(c) {
-  c.rect(13, 12, 14, 13, OUTLINE); // nose
-  c.rect(13, 14, 14, 14, OUTLINE); // philtrum
+  // Bold logo-style nose (triangle)
+  c.rect(12, 12, 15, 12, OUTLINE);
+  c.rect(13, 13, 14, 13, OUTLINE);
+  c.set(13, 14, OUTLINE); c.set(14, 14, OUTLINE); // philtrum
   // Shiba smile — two curves drooping from the philtrum
   c.set(12, 15, OUTLINE); c.set(11, 14, OUTLINE);
   c.set(15, 15, OUTLINE); c.set(16, 14, OUTLINE);
