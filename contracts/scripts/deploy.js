@@ -17,7 +17,7 @@ async function main() {
   const treasury = process.env.TREASURY || deployer.address;
   // Mock DEX: stock tokens minted per 1 ETH of "buy stock" input.
   const STOCK_PER_ETH = ethers.parseEther("1000");
-  const baseURI = process.env.BASE_URI || "https://stonkinu.cash/api/broker/";
+  const baseURI = process.env.BASE_URI || "https://stonkinu.cash/nft/metadata/";
 
   console.log(`Deploying StonkInu to chainId ${chainId} as ${deployer.address}`);
   console.log(`Treasury: ${treasury}`);

@@ -127,6 +127,36 @@ NFT. `accountOf(tokenId)` returns the address whether or not it's been deployed.
 
 ---
 
+## Art — 999 broker PFPs
+
+The collection art is generated deterministically by `art/broker.js` (flat pixel-art
+brokers: head + suit + hanging tie + briefcase, in the classic NFT-broker style).
+
+```bash
+cd art
+npm install
+node broker.js            # 15 sample previews -> art/samples/_sheet.png
+node broker.js --all      # all 999 -> web/public/nft/images/<id>.png
+                          #          + metadata -> web/data/nft-metadata/<id>
+                          #          + art/rarity.json
+```
+
+- **Images**: `web/public/nft/images/<id>.png` (served statically).
+- **Metadata**: served as JSON by the route `web/app/nft/metadata/[id]/route.ts`
+  at `/nft/metadata/<id>`, with the `image` field rewritten to an absolute URL
+  for the requesting host. The contract's `baseTokenURI` points here, so
+  `tokenURI(<id>)` = `<site>/nft/metadata/<id>`.
+- **Traits**: Background, Fur, Eyes, Suit, Tie, Hat, Briefcase — each token is
+  deterministic (seeded by id) and de-duplicated so all 999 are unique.
+
+### Swapping in higher-fidelity art (enhance pipeline)
+
+The base images are a clean starting point. To use polished/AI-enhanced art,
+keep the **same filenames** (`1.png … 999.png`) and drop them into
+`web/public/nft/images/`, overwriting the base renders. Nothing else changes —
+the metadata, `tokenURI`, website, and on-chain wiring all stay identical, so
+the upgrade is a pure drop-in replacement.
+
 ## Roadmap (the trading floor)
 
 Marketplace / Swap Desk · Stonk Launcher (bonding curve / fixed price) · Safety

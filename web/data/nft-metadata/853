@@ -1,0 +1,35 @@
+{
+  "name": "StonkInu Broker #853",
+  "description": "StonkInu Broker — one of 999 broker NFTs. Each carries its own ERC-6551 wallet and earns tokenized stock from every mint.",
+  "image": "/nft/images/853.png",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Ink"
+    },
+    {
+      "trait_type": "Fur",
+      "value": "Ash"
+    },
+    {
+      "trait_type": "Eyes",
+      "value": "Sunglasses"
+    },
+    {
+      "trait_type": "Suit",
+      "value": "Maroon"
+    },
+    {
+      "trait_type": "Tie",
+      "value": "Green"
+    },
+    {
+      "trait_type": "Hat",
+      "value": "Spikes"
+    },
+    {
+      "trait_type": "Briefcase",
+      "value": "Red"
+    }
+  ]
+}

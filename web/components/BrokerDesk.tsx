@@ -174,20 +174,27 @@ export function BrokerDesk() {
 }
 
 function BrokerCard({ id, tba }: { id: bigint; tba?: string }) {
+  const imgId = ((id - 1n) % 999n) + 1n; // art ids are 1..999
   return (
-    <div className="panel rounded-lg p-5">
-      <div className="flex items-center justify-between">
-        <div className="text-2xl font-black acid-text">#{id.toString()}</div>
-        <span className="rounded-full border border-line px-2 py-0.5 text-[10px] uppercase tracking-widest text-acidDim">
-          Broker
-        </span>
-      </div>
-      <div className="mt-4 rounded-md border border-line bg-ink/50 p-3">
-        <div className="text-[10px] uppercase tracking-widest text-acidDim">
-          ERC-6551 wallet
+    <div className="panel overflow-hidden rounded-lg">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={`/nft/images/${imgId.toString()}.png`}
+        alt={`StonkInu Broker #${id.toString()}`}
+        className="aspect-square w-full bg-ink [image-rendering:pixelated]"
+      />
+      <div className="p-4">
+        <div className="flex items-center justify-between">
+          <div className="text-xl font-black acid-text">#{id.toString()}</div>
+          <span className="rounded-full border border-line px-2 py-0.5 text-[10px] uppercase tracking-widest text-acidDim">
+            Broker
+          </span>
         </div>
-        <div className="mt-1 font-mono text-sm text-gold">
-          {tba ? short(tba) : "…"}
+        <div className="mt-3 rounded-md border border-line bg-ink/50 p-2.5">
+          <div className="text-[10px] uppercase tracking-widest text-acidDim">
+            ERC-6551 wallet
+          </div>
+          <div className="mt-1 font-mono text-sm text-gold">{tba ? short(tba) : "…"}</div>
         </div>
       </div>
     </div>

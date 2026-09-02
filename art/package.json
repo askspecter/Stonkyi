@@ -1,0 +1,13 @@
+{
+  "name": "stonkinu-art",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "samples": "node broker.js",
+    "all": "node broker.js --all"
+  },
+  "dependencies": {
+    "sharp": "^0.33.5"
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "Background": {
+    "Maroon": 89,
+    "Teal": 75,
+    "Slate": 82,
+    "Ink": 157,
+    "Forest": 118,
+    "Navy": 113,
+    "Charcoal": 164,
+    "Grape": 122,
+    "Sky": 42,
+    "Acid": 37
+  },
+  "Fur": {
+    "Gray": 184,
+    "White": 75,
+    "Tan": 97,
+    "Cream": 160,
+    "Kuro": 151,
+    "Red Sesame": 137,
+    "Zombie": 46,
+    "Ash": 116,
+    "Frost": 33
+  },
+  "Eyes": {
+    "Sunglasses": 288,
+    "Angry": 150,
+    "Laser": 49,
+    "3D": 115,
+    "Normal": 199,
+    "Stonk": 89,
+    "Wide": 76,
+    "Visor": 33
+  },
+  "Suit": {
+    "Charcoal": 152,
+    "Grape": 104,
+    "Black": 207,
+    "Navy": 136,
+    "Forest": 126,
+    "Teal": 88,
+    "Slate": 78,
+    "Maroon": 76,
+    "Rainbow": 32
+  },
+  "Tie": {
+    "Gold": 152,
+    "Green": 107,
+    "Red": 172,
+    "Grape": 93,
+    "Pink": 82,
+    "Acid": 101,
+    "Orange": 91,
+    "Silver": 42,
+    "Blue": 127,
+    "Rainbow": 32
+  },
+  "Hat": {
+    "Crown": 43,
+    "Cap": 178,
+    "Beanie": 121,
+    "Spikes": 94,
+    "Fedora": 140,
+    "Top Hat": 73,
+    "None": 314,
+    "Halo": 36
+  },
+  "Briefcase": {
+    "Blue": 82,
+    "None": 450,
+    "Red": 111,
+    "Green": 146,
+    "Gold": 152,
+    "Silver": 58
+  }
+}
