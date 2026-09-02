@@ -72,106 +72,105 @@ function outlineRegion(c) {
   for (const [x, y] of pts) if (!c.get(x, y)) c.set(x, y, OUTLINE);
 }
 
-// ── Head (rows 0-15) — Shiba Inu: big triangular ears, wide cream muzzle ──────
+// ── Head (rows 2-16) — Shiba Inu, lowered with top breathing room ────────────
 function drawHead(c, fur) {
   const F = fur.base, S = fur.shadow, M = fur.muzzle;
-  // Big pointed Shiba ears (triangles) with cream inner.
-  // Left ear
-  c.set(8, 0, F);
-  c.rect(7, 1, 9, 1, F);
-  c.rect(6, 2, 10, 4, F);
-  c.rect(8, 2, 9, 3, M); // inner ear
-  c.set(8, 3, S);
-  // Right ear (mirror)
-  c.set(19, 0, F);
-  c.rect(18, 1, 20, 1, F);
-  c.rect(17, 2, 21, 4, F);
-  c.rect(18, 2, 19, 3, M);
-  c.set(19, 3, S);
+  // Big triangular Shiba ears with dark edge + cream inner.
+  // Left ear (cols 6-10)
+  c.set(8, 2, F);
+  c.rect(7, 3, 9, 3, F);
+  c.rect(6, 4, 10, 5, F);
+  c.rect(8, 4, 8, 5, M); // inner ear
+  c.set(8, 4, S);
+  // Right ear (cols 17-21, mirror)
+  c.set(19, 2, F);
+  c.rect(18, 3, 20, 3, F);
+  c.rect(17, 4, 21, 5, F);
+  c.rect(19, 4, 19, 5, M);
+  c.set(19, 4, S);
   // Head (rounded block)
-  c.rect(9, 4, 18, 4, F);
-  c.rect(8, 5, 19, 9, F);
-  c.rect(9, 10, 18, 13, F);
-  c.rect(18, 5, 18, 8, S); // right cheek shadow
-  // Cream eyebrow dots (classic Shiba markings)
-  c.rect(9, 6, 10, 6, M);
-  c.rect(17, 6, 18, 6, M);
-  // Wide cream muzzle that flares out to the cheeks
-  c.rect(10, 9, 17, 14, M);
-  c.rect(9, 10, 18, 13, M);
-  c.rect(8, 11, 8, 13, M); c.rect(19, 11, 19, 13, M); // cheek flare
-  c.set(7, 12, M); c.set(20, 12, M);
+  c.rect(9, 5, 18, 5, F);
+  c.rect(8, 6, 19, 15, F);
+  c.rect(10, 16, 17, 16, F);
+  c.rect(19, 7, 19, 11, S); // right cheek shadow
+  // Cream eyebrow dots (classic Shiba markings), above the eyes
+  c.rect(9, 8, 10, 8, M);
+  c.rect(17, 8, 18, 8, M);
+  // Cream muzzle framed by fur, flaring into blush cheeks
+  c.rect(10, 11, 17, 16, M);
+  c.rect(9, 12, 18, 15, M);
+  c.rect(8, 13, 8, 15, M); c.rect(19, 13, 19, 15, M); // cheek flare
+  c.set(7, 14, M); c.set(20, 14, M);
   outlineRegion(c);
 }
 
 const EYE = {
-  normal(c) { for (const ex of [9, 16]) { c.rect(ex, 7, ex + 2, 8, "#fff"); c.rect(ex + 1, 7, ex + 2, 8, OUTLINE); } },
-  angry(c) { for (const ex of [9, 16]) { c.rect(ex, 8, ex + 2, 8, "#fff"); c.set(ex + 2, 8, OUTLINE); c.rect(ex, 7, ex + 2, 7, OUTLINE); } },
-  wide(c) { for (const ex of [9, 16]) { c.rect(ex, 6, ex + 2, 8, "#fff"); c.rect(ex + 1, 7, ex + 1, 8, OUTLINE); } },
-  stonk(c) { for (const ex of [9, 16]) { c.rect(ex, 7, ex + 2, 7, "#7dff4d"); c.set(ex + 1, 6, "#7dff4d"); c.set(ex + 1, 8, "#7dff4d"); } },
-  laser(c) { for (const ex of [9, 16]) { c.rect(ex, 7, ex + 2, 8, "#ff4d4d"); c.set(ex, 7, "#ffd0d0"); } },
+  normal(c) { for (const ex of [9, 16]) { c.rect(ex, 9, ex + 2, 10, "#fff"); c.rect(ex + 1, 9, ex + 2, 10, OUTLINE); } },
+  angry(c) { for (const ex of [9, 16]) { c.rect(ex, 10, ex + 2, 10, "#fff"); c.set(ex + 2, 10, OUTLINE); c.rect(ex, 9, ex + 2, 9, OUTLINE); } },
+  wide(c) { for (const ex of [9, 16]) { c.rect(ex, 8, ex + 2, 10, "#fff"); c.rect(ex + 1, 9, ex + 1, 10, OUTLINE); } },
+  stonk(c) { for (const ex of [9, 16]) { c.rect(ex, 9, ex + 2, 9, "#7dff4d"); c.set(ex + 1, 8, "#7dff4d"); c.set(ex + 1, 10, "#7dff4d"); } },
+  laser(c) { for (const ex of [9, 16]) { c.rect(ex, 9, ex + 2, 10, "#ff4d4d"); c.set(ex, 9, "#ffd0d0"); } },
   sunglasses(c) {
-    c.rect(8, 7, 11, 9, OUTLINE); c.rect(16, 7, 19, 9, OUTLINE); c.rect(12, 7, 15, 7, OUTLINE);
-    for (const [x, y] of [[9, 8], [10, 8], [9, 7]]) c.set(x, y, "#E8B84B");
-    for (const [x, y] of [[17, 8], [18, 8], [18, 7]]) c.set(x, y, "#E8B84B");
+    c.rect(8, 9, 11, 11, OUTLINE); c.rect(16, 9, 19, 11, OUTLINE); c.rect(12, 9, 15, 9, OUTLINE);
+    for (const [x, y] of [[9, 10], [10, 10], [9, 9]]) c.set(x, y, "#E8B84B");
+    for (const [x, y] of [[17, 10], [18, 10], [18, 9]]) c.set(x, y, "#E8B84B");
   },
-  threeD(c) { c.rect(8, 7, 11, 9, "#ff2a2acc"); c.rect(16, 7, 19, 9, "#2a6bffcc"); c.rect(8, 7, 19, 7, OUTLINE); c.rect(12, 7, 15, 7, OUTLINE); },
-  visor(c) { c.rect(7, 7, 20, 8, "#1fd0c0"); c.rect(7, 7, 20, 7, "#0e6f66"); c.rect(7, 9, 20, 9, "#14514b"); },
+  threeD(c) { c.rect(8, 9, 11, 11, "#ff2a2acc"); c.rect(16, 9, 19, 11, "#2a6bffcc"); c.rect(8, 9, 19, 9, OUTLINE); c.rect(12, 9, 15, 9, OUTLINE); },
+  visor(c) { c.rect(7, 9, 20, 10, "#1fd0c0"); c.rect(7, 9, 20, 9, "#0e6f66"); c.rect(7, 11, 20, 11, "#14514b"); },
 };
 
 function drawNoseMouth(c) {
-  c.rect(13, 10, 14, 11, OUTLINE); // nose
-  c.rect(13, 12, 14, 12, OUTLINE); // philtrum
+  c.rect(13, 12, 14, 13, OUTLINE); // nose
+  c.rect(13, 14, 14, 14, OUTLINE); // philtrum
   // Shiba smile — two curves drooping from the philtrum
-  c.set(12, 13, OUTLINE); c.set(11, 12, OUTLINE);
-  c.set(15, 13, OUTLINE); c.set(16, 12, OUTLINE);
+  c.set(12, 15, OUTLINE); c.set(11, 14, OUTLINE);
+  c.set(15, 15, OUTLINE); c.set(16, 14, OUTLINE);
 }
 
-// ── Body (rows 14-27): jacket + shirt + wide tie + cuffs ─────────────────────
+// ── Body (rows 17-27): jacket + shirt + wide tie + cuffs ─────────────────────
 function drawBody(c, suit, tie) {
   const col = (x) => (suit.rainbow ? RAINBOW[Math.floor((x - 3) / 4) % 6] : suit.color);
   for (let x = 3; x <= 24; x++) {
-    const top = x <= 5 || x >= 22 ? 19 : x <= 8 || x >= 19 ? 17 : 15;
+    const top = x <= 5 || x >= 22 ? 21 : x <= 8 || x >= 19 ? 19 : 17;
     for (let y = top; y <= 27; y++) c.set(x, y, col(x));
   }
   outlineRegion(c);
   // White shirt collar V
-  c.rect(11, 15, 16, 16, SHIRT);
-  c.set(10, 16, SHIRT); c.set(17, 16, SHIRT);
-  c.rect(12, 17, 15, 17, SHIRT);
+  c.rect(11, 17, 16, 18, SHIRT);
+  c.set(10, 18, SHIRT); c.set(17, 18, SHIRT);
+  c.rect(12, 19, 15, 19, SHIRT);
   // Lapel outline
-  c.set(10, 17, OUTLINE); c.set(17, 17, OUTLINE);
-  c.set(9, 18, OUTLINE); c.set(18, 18, OUTLINE);
-  c.set(10, 18, OUTLINE); c.set(17, 18, OUTLINE);
+  c.set(10, 19, OUTLINE); c.set(17, 19, OUTLINE);
+  c.set(9, 20, OUTLINE); c.set(18, 20, OUTLINE);
   // Tie (4 wide, symmetric cols 12-15)
   const tcol = (y) => (tie.rainbow ? RAINBOW[y % 6] : tie.color);
-  c.rect(12, 17, 15, 18, tcol(0)); // knot
-  for (let y = 19; y <= 24; y++) c.rect(12, y, 15, y, tcol(y));
-  c.rect(13, 25, 14, 26, tcol(9)); // taper
+  c.rect(12, 19, 15, 20, tcol(0)); // knot
+  for (let y = 21; y <= 25; y++) c.rect(12, y, 15, y, tcol(y));
+  c.rect(13, 26, 14, 27, tcol(9)); // taper
   // Cuffs
-  c.rect(5, 25, 7, 27, SHIRT); c.rect(20, 25, 22, 27, SHIRT);
-  c.rect(5, 25, 7, 25, "#cfcfcf"); c.rect(20, 25, 22, 25, "#cfcfcf");
+  c.rect(5, 26, 7, 27, SHIRT); c.rect(20, 26, 22, 27, SHIRT);
+  c.rect(5, 26, 7, 26, "#cfcfcf"); c.rect(20, 26, 22, 26, "#cfcfcf");
 }
 
 function drawBriefcase(c, color) {
   if (!color) return;
-  c.rect(1, 23, 7, 27, color);
-  c.rect(1, 23, 7, 23, OUTLINE);
-  c.rect(1, 23, 1, 27, OUTLINE);
-  c.set(7, 24, OUTLINE); c.set(7, 26, OUTLINE);
-  c.rect(3, 21, 5, 22, OUTLINE); c.set(3, 22, color); c.set(4, 22, color); c.set(5, 22, color);
-  c.rect(3, 25, 4, 25, OUTLINE); // latch
+  c.rect(1, 24, 7, 27, color);
+  c.rect(1, 24, 7, 24, OUTLINE);
+  c.rect(1, 24, 1, 27, OUTLINE);
+  c.set(7, 25, OUTLINE); c.set(7, 27, OUTLINE);
+  c.rect(3, 22, 5, 23, OUTLINE); c.set(3, 23, color); c.set(4, 23, color); c.set(5, 23, color);
+  c.rect(3, 26, 4, 26, OUTLINE); // latch
 }
 
 const HATS = {
   none() {},
-  cap(c) { c.rect(8, 2, 19, 4, "#D53E36"); c.rect(7, 4, 20, 4, "#D53E36"); c.rect(8, 2, 19, 2, "#e0574a"); c.rect(3, 4, 9, 5, "#a12b22"); c.set(13, 2, "#fff"); c.set(14, 2, "#fff"); },
-  fedora(c) { c.rect(9, 1, 18, 3, "#4A4E57"); c.rect(5, 4, 22, 5, "#3A3E46"); c.rect(9, 3, 18, 3, "#c99b3a"); },
-  beanie(c) { c.rect(8, 2, 19, 4, "#2f6e43"); c.rect(7, 4, 20, 5, "#245536"); c.rect(13, 0, 14, 1, "#eee"); },
-  spikes(c) { for (const x of [8, 11, 13, 15, 18]) { c.set(x, 1, "#D53E36"); c.rect(x, 2, x, 3, "#D53E36"); } },
-  tophat(c) { c.rect(9, 0, 18, 3, "#141418"); c.rect(9, 2, 18, 3, "#D53E36"); c.rect(5, 4, 22, 4, "#141418"); },
-  crown(c) { c.rect(9, 2, 18, 4, "#E8B84B"); for (const x of [9, 12, 15, 18]) c.set(x, 1, "#E8B84B"); c.set(13, 3, "#D53E36"); c.set(14, 3, "#3b6fb0"); },
-  halo(c) { c.rect(10, 0, 17, 0, "#ffe98a"); c.set(9, 1, "#ffe98a"); c.set(18, 1, "#ffe98a"); },
+  cap(c) { c.rect(8, 4, 19, 6, "#D53E36"); c.rect(7, 6, 20, 6, "#D53E36"); c.rect(8, 4, 19, 4, "#e0574a"); c.rect(3, 6, 9, 7, "#a12b22"); c.set(13, 4, "#fff"); c.set(14, 4, "#fff"); },
+  fedora(c) { c.rect(9, 3, 18, 5, "#4A4E57"); c.rect(5, 6, 22, 7, "#3A3E46"); c.rect(9, 5, 18, 5, "#c99b3a"); },
+  beanie(c) { c.rect(8, 4, 19, 6, "#2f6e43"); c.rect(7, 6, 20, 7, "#245536"); c.rect(13, 2, 14, 3, "#eee"); },
+  spikes(c) { for (const x of [8, 11, 13, 15, 18]) { c.set(x, 3, "#D53E36"); c.rect(x, 4, x, 5, "#D53E36"); } },
+  tophat(c) { c.rect(9, 1, 18, 5, "#141418"); c.rect(9, 4, 18, 5, "#D53E36"); c.rect(5, 6, 22, 6, "#141418"); },
+  crown(c) { c.rect(9, 4, 18, 6, "#E8B84B"); for (const x of [9, 12, 15, 18]) c.set(x, 3, "#E8B84B"); c.set(13, 5, "#D53E36"); c.set(14, 5, "#3b6fb0"); },
+  halo(c) { c.rect(10, 1, 17, 1, "#ffe98a"); c.set(9, 2, "#ffe98a"); c.set(18, 2, "#ffe98a"); },
 };
 
 function buildTraits(id, salt = 0) {
