@@ -226,8 +226,8 @@ async function main() {
 
 async function generateAll() {
   const SUPPLY = 999;
-  const imgDir = path.join(__dirname, "..", "web", "public", "nft", "images");
-  const metaDir = path.join(__dirname, "..", "web", "data", "nft-metadata");
+  const imgDir = path.join(__dirname, "..", "public", "nft", "images");
+  const metaDir = path.join(__dirname, "..", "data", "nft-metadata");
   fs.mkdirSync(imgDir, { recursive: true });
   fs.mkdirSync(metaDir, { recursive: true });
   const seen = new Set(); const rarity = {};

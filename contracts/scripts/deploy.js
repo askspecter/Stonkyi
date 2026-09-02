@@ -105,7 +105,7 @@ async function main() {
   console.log("\nDeployed addresses:");
   console.table(addresses);
 
-  const outDir = path.join(__dirname, "..", "..", "web", "config", "deployments");
+  const outDir = path.join(__dirname, "..", "..", "config", "deployments");
   fs.mkdirSync(outDir, { recursive: true });
   fs.writeFileSync(path.join(outDir, `${chainId}.json`), JSON.stringify(addresses, null, 2));
   console.log(`\nWrote ${path.join(outDir, `${chainId}.json`)}`);

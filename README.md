@@ -10,8 +10,10 @@ existing holders.
 
 ```
 Repo layout
+├── app/ components/ config/ lib/ public/ data/   Next.js frontend (at repo root,
+│                                                  so Vercel auto-detects it)
 ├── contracts/   Hardhat project — Solidity contracts, tests, deploy script
-└── web/         Next.js + wagmi + RainbowKit frontend (landing, mint, dashboard)
+└── art/         999 broker PFP generator (pixel art + metadata)
 ```
 
 ---
@@ -65,7 +67,7 @@ npm run compile
 npm test          # 12 passing — mint, fee split, distribution, claim, ERC-6551
 ```
 
-Run a local chain and deploy (writes addresses to `web/config/deployments/31337.json`):
+Run a local chain and deploy (writes addresses to `config/deployments/31337.json`):
 
 ```bash
 npx hardhat node          # terminal 1
@@ -97,8 +99,9 @@ npm run deploy:sepolia
 
 ### 2. Frontend
 
+The Next.js app lives at the repo root. From the repo root:
+
 ```bash
-cd web
 npm install
 cp .env.example .env.local   # add a WalletConnect id from https://cloud.reown.com
 npm run dev                  # http://localhost:3000
@@ -108,19 +111,18 @@ Set `NEXT_PUBLIC_CHAIN_ID` to `31337` for local Hardhat or `11155111` for Sepoli
 
 #### Deploying to Vercel
 
-The Next.js app lives in the `web/` subfolder, so Vercel must be told where it
-is — otherwise every route 404s:
+The Next.js app is at the repo root, so Vercel auto-detects it — no Root
+Directory change needed:
 
-1. Import the repo in Vercel.
-2. **Project Settings → General → Root Directory → set to `web`** (this is the
-   fix for a 404 on a fresh deploy). Framework preset: **Next.js**.
-3. Add env vars: `NEXT_PUBLIC_WALLETCONNECT_ID`, and `NEXT_PUBLIC_CHAIN_ID`
+1. Import the repo in Vercel (Framework preset: **Next.js**, Root Directory:
+   default `./`).
+2. Add env vars: `NEXT_PUBLIC_WALLETCONNECT_ID` and `NEXT_PUBLIC_CHAIN_ID`
    (e.g. `11155111`).
-4. Deploy.
+3. Deploy.
 
 The `/nft/metadata/[id]` route is server-rendered and reads the metadata files
-in `web/data/nft-metadata/`; `next.config.mjs` traces those into the function
-bundle so they resolve in production.
+in `data/nft-metadata/`; `next.config.mjs` traces those into the function bundle
+so they resolve in production.
 The frontend reads contract addresses from `web/config/deployments/<chainId>.json`,
 which the deploy script generates.
 
@@ -152,13 +154,13 @@ brokers: head + suit + hanging tie + briefcase, in the classic NFT-broker style)
 cd art
 npm install
 node broker.js            # 15 sample previews -> art/samples/_sheet.png
-node broker.js --all      # all 999 -> web/public/nft/images/<id>.png
-                          #          + metadata -> web/data/nft-metadata/<id>
+node broker.js --all      # all 999 -> public/nft/images/<id>.png
+                          #          + metadata -> data/nft-metadata/<id>
                           #          + art/rarity.json
 ```
 
-- **Images**: `web/public/nft/images/<id>.png` (served statically).
-- **Metadata**: served as JSON by the route `web/app/nft/metadata/[id]/route.ts`
+- **Images**: `public/nft/images/<id>.png` (served statically).
+- **Metadata**: served as JSON by the route `app/nft/metadata/[id]/route.ts`
   at `/nft/metadata/<id>`, with the `image` field rewritten to an absolute URL
   for the requesting host. The contract's `baseTokenURI` points here, so
   `tokenURI(<id>)` = `<site>/nft/metadata/<id>`.
@@ -169,7 +171,7 @@ node broker.js --all      # all 999 -> web/public/nft/images/<id>.png
 
 The base images are a clean starting point. To use polished/AI-enhanced art,
 keep the **same filenames** (`1.png … 999.png`) and drop them into
-`web/public/nft/images/`, overwriting the base renders. Nothing else changes —
+`public/nft/images/`, overwriting the base renders. Nothing else changes —
 the metadata, `tokenURI`, website, and on-chain wiring all stay identical, so
 the upgrade is a pure drop-in replacement.
 

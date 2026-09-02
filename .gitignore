@@ -1,12 +1,16 @@
 # Dependencies
 node_modules/
 
-# Build output
+# Next.js
+/.next/
+/out/
+next-env.d.ts
+*.tsbuildinfo
+
+# Contracts build output
 contracts/cache/
 contracts/artifacts/
 contracts/typechain-types/
-web/.next/
-web/out/
 
 # Env / secrets
 .env
@@ -14,4 +18,3 @@ web/out/
 
 # OS / editor
 .DS_Store
-*.tsbuildinfo
