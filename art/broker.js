@@ -76,19 +76,21 @@ function outlineRegion(c) {
 //    muzzle, cream brow marks + ear carets ─────────────────────────────────────
 function drawHead(c, fur) {
   const F = fur.base, S = fur.shadow, M = fur.muzzle;
-  // Ears: fur triangle with a cream caret inner (logo style)
-  // Left ear (cols 6-10)
-  c.set(8, 2, F);
+  // Upright pointed triangular ears (tapering to the tip, not drooping).
+  // Left ear — tip col 8
+  c.set(8, 1, F);
+  c.rect(8, 2, 9, 2, F);
   c.rect(7, 3, 9, 3, F);
-  c.rect(6, 4, 10, 6, F);
-  c.set(8, 4, M); c.set(9, 5, M); // inner caret
-  // Right ear (cols 17-21)
-  c.set(19, 2, F);
+  c.rect(7, 4, 10, 5, F);
+  c.set(8, 3, M); c.set(9, 4, M); // inner cream
+  // Right ear — tip col 19 (mirror)
+  c.set(19, 1, F);
+  c.rect(18, 2, 19, 2, F);
   c.rect(18, 3, 20, 3, F);
-  c.rect(17, 4, 21, 6, F);
-  c.set(19, 4, M); c.set(18, 5, M);
+  c.rect(17, 4, 20, 5, F);
+  c.set(19, 3, M); c.set(18, 4, M);
   // Head (rounded, wide)
-  c.rect(9, 5, 18, 5, F);
+  c.rect(8, 5, 19, 5, F);
   c.rect(7, 6, 20, 15, F);
   c.rect(8, 16, 19, 16, F);
   c.rect(20, 8, 20, 12, S); // right cheek shadow
