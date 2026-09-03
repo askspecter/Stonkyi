@@ -1,21 +1,28 @@
 import Link from "next/link";
+import { Leaf, XIcon, DiscordIcon, TelegramIcon } from "./Icons";
 
 export function Footer() {
   return (
     <footer className="border-t border-line px-5 py-16">
       <div className="mx-auto max-w-6xl">
         <div className="flex items-center gap-2">
-          <span className="serif text-3xl">StonkInu</span>
-          <span className="text-acid">🌿</span>
+          <Leaf className="h-6 w-6 text-acid" />
+          <span className="display text-2xl">StonkInu</span>
         </div>
-        <p className="serif mt-3 max-w-md text-xl italic text-mist">
+        <p className="mt-3 max-w-md text-lg text-mist">
           Your broker buys you stocks. You own your broker.
         </p>
 
-        <div className="mt-6 flex items-center gap-4 text-mist">
-          <a href="#" aria-label="X" className="hover:text-acid transition-colors">𝕏</a>
-          <a href="#" aria-label="Discord" className="hover:text-acid transition-colors">◈</a>
-          <a href="#" aria-label="Telegram" className="hover:text-acid transition-colors">✈</a>
+        <div className="mt-6 flex items-center gap-3 text-mist">
+          <a href="#" aria-label="X" className="grid h-9 w-9 place-items-center rounded-full border border-line hover:border-acid/50 hover:text-acid transition-colors">
+            <XIcon className="h-4 w-4" />
+          </a>
+          <a href="#" aria-label="Discord" className="grid h-9 w-9 place-items-center rounded-full border border-line hover:border-acid/50 hover:text-acid transition-colors">
+            <DiscordIcon className="h-4 w-4" />
+          </a>
+          <a href="#" aria-label="Telegram" className="grid h-9 w-9 place-items-center rounded-full border border-line hover:border-acid/50 hover:text-acid transition-colors">
+            <TelegramIcon className="h-4 w-4" />
+          </a>
         </div>
 
         <div className="mt-10 grid gap-8 border-t border-line pt-8 sm:grid-cols-3">

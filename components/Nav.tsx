@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { short } from "@/lib/format";
+import { Leaf } from "./Icons";
 
 const links = [
   { href: "/", label: "Home" },
@@ -17,8 +18,8 @@ export function Nav() {
     <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-5 sm:pt-4">
       <div className="mx-auto flex max-w-6xl items-center justify-between rounded-full border border-line bg-coal/70 px-4 py-2.5 backdrop-blur-xl sm:px-5">
         <Link href="/" className="flex items-center gap-2">
-          <span className="serif text-2xl leading-none tracking-tight">StonkInu</span>
-          <span className="text-acid" aria-hidden>🌿</span>
+          <Leaf className="h-5 w-5 text-acid" />
+          <span className="display text-xl leading-none">StonkInu</span>
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">

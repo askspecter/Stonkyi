@@ -1,19 +1,17 @@
 import { Hero } from "@/components/Hero";
-import { DeskSim } from "@/components/DeskSim";
-import { Flywheel } from "@/components/Flywheel";
-import { StatsBand } from "@/components/StatsBand";
-import { TradingFloor } from "@/components/TradingFloor";
-import { EnterCTA } from "@/components/EnterCTA";
+import { Steps } from "@/components/Steps";
+import { Collection } from "@/components/Collection";
+import { Numbers } from "@/components/Numbers";
+import { CloseCTA } from "@/components/CloseCTA";
 
 export default function HomePage() {
   return (
     <>
       <Hero />
-      <DeskSim />
-      <Flywheel />
-      <StatsBand />
-      <TradingFloor />
-      <EnterCTA />
+      <Steps />
+      <Collection />
+      <Numbers />
+      <CloseCTA />
     </>
   );
 }

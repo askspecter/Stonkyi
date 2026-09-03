@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  --font-serif: "Instrument Serif", Georgia, serif;
+  --font-display: "Space Grotesk", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
   --font-sans: "Inter", system-ui, sans-serif;
 }
@@ -11,55 +11,57 @@
 html {
   scroll-behavior: smooth;
 }
-
 html,
 body {
-  background-color: #07080a;
-  color: #e7ece7;
+  background-color: #07090a;
+  color: #e9efe9;
   -webkit-font-smoothing: antialiased;
 }
-
 body {
   font-family: var(--font-sans);
   overflow-x: hidden;
 }
-
 ::selection {
-  background: rgba(200, 242, 78, 0.28);
+  background: rgba(200, 242, 78, 0.26);
 }
 
-.serif {
-  font-family: var(--font-serif);
-  font-weight: 400;
-  letter-spacing: -0.01em;
+.display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 0.98;
 }
-
 .label {
   font-family: var(--font-mono);
   text-transform: uppercase;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.24em;
   font-size: 11px;
-  color: #8b9591;
+  color: #7f8a83;
 }
 
-/* Subtle diagonal texture used on section panels */
-.hatch {
-  background-image: repeating-linear-gradient(
-    -45deg,
-    rgba(255, 255, 255, 0.02) 0px,
-    rgba(255, 255, 255, 0.02) 1px,
-    transparent 1px,
-    transparent 9px
-  );
+/* Reveal (IntersectionObserver toggles .in) */
+.reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
 }
-
-.glow-ring {
-  box-shadow: 0 0 0 1px rgba(200, 242, 78, 0.25), 0 0 60px rgba(200, 242, 78, 0.12);
+.reveal.in {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
 
 .btn-acid {
   background: #c8f24e;
-  color: #0a0f04;
+  color: #0a1104;
   font-family: var(--font-mono);
   text-transform: uppercase;
   letter-spacing: 0.14em;
@@ -67,15 +69,14 @@ body {
   transition: transform 0.12s ease, box-shadow 0.25s ease, filter 0.2s ease;
 }
 .btn-acid:hover {
-  box-shadow: 0 0 34px rgba(200, 242, 78, 0.5);
-  filter: brightness(1.04);
+  box-shadow: 0 0 30px rgba(200, 242, 78, 0.45);
+  filter: brightness(1.05);
 }
 .btn-acid:active {
   transform: translateY(1px);
 }
-
 .btn-ghost {
-  border: 1px solid #20262a;
+  border: 1px solid #232a29;
   color: #cdd6cf;
   font-family: var(--font-mono);
   text-transform: uppercase;
@@ -88,33 +89,47 @@ body {
   background: rgba(200, 242, 78, 0.04);
 }
 
-[image-rendering-pixel] {
-  image-rendering: pixelated;
-}
 .pixel {
   image-rendering: pixelated;
 }
 
-/* Compatibility helpers for the mint / dashboard pages */
+/* Compatibility helpers for mint / dashboard pages */
 .panel {
-  background: rgba(16, 19, 22, 0.6);
-  border: 1px solid #20262a;
+  background: rgba(15, 19, 20, 0.6);
+  border: 1px solid #232a29;
 }
 .acid-text {
   color: #c8f24e;
 }
 .grid-bg {
   background-image:
-    linear-gradient(rgba(200, 242, 78, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(200, 242, 78, 0.04) 1px, transparent 1px);
-  background-size: 40px 40px;
+    linear-gradient(rgba(200, 242, 78, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(200, 242, 78, 0.05) 1px, transparent 1px);
+  background-size: 42px 42px;
 }
 
-/* Fade grid background */
-.grid-fade {
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+@keyframes floaty {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+.floaty {
+  animation: floaty 7s ease-in-out infinite;
+}
+
+/* soft radial vignette used behind hero */
+.aura {
+  background: radial-gradient(60% 50% at 50% 0%, rgba(200, 242, 78, 0.1), transparent 70%);
 }
