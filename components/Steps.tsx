@@ -33,8 +33,8 @@ export function Steps() {
         <div className="mt-14 grid gap-5 md:grid-cols-3">
           {STEPS.map((s, i) => (
             <Reveal key={s.n} delay={i * 90}>
-              <div className="flex h-full flex-col rounded-2xl border border-line bg-panel/50 p-7">
-                <div className="display text-5xl text-line">{s.n}</div>
+              <div className="glass lift flex h-full flex-col rounded-2xl p-7">
+                <div className="display grad-acid text-5xl opacity-90">{s.n}</div>
                 <h3 className="mt-4 text-xl font-semibold text-[#eef3ea]">{s.title}</h3>
                 <p className="mt-3 text-sm leading-relaxed text-mist">{s.body}</p>
 

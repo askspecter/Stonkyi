@@ -133,3 +133,81 @@ body {
 .aura {
   background: radial-gradient(60% 50% at 50% 0%, rgba(200, 242, 78, 0.1), transparent 70%);
 }
+
+/* ---- Cinematic hero atmosphere ---- */
+.glow {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(90px);
+  pointer-events: none;
+  z-index: 0;
+}
+.grain {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-size: 4px 4px;
+  opacity: 0.5;
+  mix-blend-mode: screen;
+}
+.grad-acid {
+  background: linear-gradient(115deg, #c8f24e 10%, #8fe0a0 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* gradient hairline used to divide sections */
+.hairline {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(200, 242, 78, 0.28), transparent);
+}
+
+/* pill badge */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 9999px;
+  border: 1px solid rgba(200, 242, 78, 0.24);
+  background: rgba(200, 242, 78, 0.07);
+  color: #c8f24e;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 7px 14px;
+}
+.pill .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: #c8f24e;
+  box-shadow: 0 0 10px #c8f24e;
+  animation: pulse 2.4s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+/* frosted glass card */
+.glass {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 40px 100px -34px rgba(0, 0, 0, 0.75);
+}
+
+/* card lift on hover */
+.lift {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.35s ease, box-shadow 0.35s ease;
+}
+.lift:hover {
+  transform: translateY(-4px);
+  border-color: rgba(200, 242, 78, 0.3);
+  box-shadow: 0 26px 60px -30px rgba(0, 0, 0, 0.8);
+}

@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useState } from "react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { short } from "@/lib/format";
-import { Leaf } from "./Icons";
 
 const links = [
   { href: "/", label: "Home" },
@@ -17,8 +16,9 @@ export function Nav() {
   return (
     <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-5 sm:pt-4">
       <div className="mx-auto flex max-w-6xl items-center justify-between rounded-full border border-line bg-coal/70 px-4 py-2.5 backdrop-blur-xl sm:px-5">
-        <Link href="/" className="flex items-center gap-2">
-          <Leaf className="h-5 w-5 text-acid" />
+        <Link href="/" className="flex items-center gap-2.5">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="StonkInu" className="pixel h-7 w-7 rounded-lg" />
           <span className="display text-xl leading-none">StonkInu</span>
         </Link>
 
