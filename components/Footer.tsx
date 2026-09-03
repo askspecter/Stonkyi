@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Leaf, XIcon, DiscordIcon, TelegramIcon } from "./Icons";
+import { Leaf, XIcon } from "./Icons";
 
 export function Footer() {
   return (
@@ -16,12 +16,6 @@ export function Footer() {
         <div className="mt-6 flex items-center gap-3 text-mist">
           <a href="#" aria-label="X" className="grid h-9 w-9 place-items-center rounded-full border border-line hover:border-acid/50 hover:text-acid transition-colors">
             <XIcon className="h-4 w-4" />
-          </a>
-          <a href="#" aria-label="Discord" className="grid h-9 w-9 place-items-center rounded-full border border-line hover:border-acid/50 hover:text-acid transition-colors">
-            <DiscordIcon className="h-4 w-4" />
-          </a>
-          <a href="#" aria-label="Telegram" className="grid h-9 w-9 place-items-center rounded-full border border-line hover:border-acid/50 hover:text-acid transition-colors">
-            <TelegramIcon className="h-4 w-4" />
           </a>
         </div>
 
