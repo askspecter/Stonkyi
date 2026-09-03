@@ -28,7 +28,8 @@ export function Reveal({
           io.disconnect();
         }
       },
-      { threshold: 0.15, rootMargin: "0px 0px -60px 0px" }
+      // fire early — start the reveal while the element is still ~18% below the fold
+      { threshold: 0.01, rootMargin: "0px 0px 18% 0px" }
     );
     io.observe(el);
     return () => io.disconnect();

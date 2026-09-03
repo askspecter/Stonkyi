@@ -20,6 +20,37 @@ body {
 body {
   font-family: var(--font-sans);
   overflow-x: hidden;
+  position: relative;
+}
+/* drifting ambient glow behind the whole page */
+body::before {
+  content: "";
+  position: fixed;
+  inset: -20%;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(40% 34% at 22% 18%, rgba(200, 242, 78, 0.09), transparent 60%),
+    radial-gradient(46% 40% at 82% 70%, rgba(31, 107, 58, 0.22), transparent 62%);
+  animation: drift 26s ease-in-out infinite alternate;
+}
+/* fixed fine grain for a filmic texture */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.028) 1px, transparent 1px);
+  background-size: 4px 4px;
+  opacity: 0.55;
+}
+@keyframes drift {
+  0% { transform: translate3d(-2%, -1%, 0) scale(1); }
+  100% { transform: translate3d(2%, 2%, 0) scale(1.08); }
+}
+@media (prefers-reduced-motion: reduce) {
+  body::before { animation: none; }
 }
 ::selection {
   background: rgba(200, 242, 78, 0.26);
@@ -43,22 +74,26 @@ body {
   color: #7f8a83;
 }
 
-/* Reveal (IntersectionObserver toggles .in) */
+/* Reveal (IntersectionObserver toggles .in) — quick, cinematic blur-in */
 .reveal {
   opacity: 0;
-  transform: translateY(22px);
-  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: opacity, transform;
+  transform: translateY(16px);
+  filter: blur(6px);
+  transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform, filter;
 }
 .reveal.in {
   opacity: 1;
   transform: none;
+  filter: none;
 }
 @media (prefers-reduced-motion: reduce) {
   .reveal {
     opacity: 1;
     transform: none;
+    filter: none;
     transition: none;
   }
 }
