@@ -109,22 +109,31 @@ npm run dev                  # http://localhost:3000
 
 Set `NEXT_PUBLIC_CHAIN_ID` to `31337` for local Hardhat or `11155111` for Sepolia.
 
-#### Deploying to Vercel
-
-The Next.js app is at the repo root, so Vercel auto-detects it — no Root
-Directory change needed:
-
-1. Import the repo in Vercel (Framework preset: **Next.js**, Root Directory:
-   default `./`).
-2. Add env vars: `NEXT_PUBLIC_WALLETCONNECT_ID` and `NEXT_PUBLIC_CHAIN_ID`
-   (e.g. `11155111`).
-3. Deploy.
-
-The `/nft/metadata/[id]` route is server-rendered and reads the metadata files
-in `data/nft-metadata/`; `next.config.mjs` traces those into the function bundle
-so they resolve in production.
-The frontend reads contract addresses from `web/config/deployments/<chainId>.json`,
+The frontend reads contract addresses from `config/deployments/<chainId>.json`,
 which the deploy script generates.
+
+#### Building & deploying (fully static)
+
+The site is a **static export** (`output: "export"` in `next.config.mjs`): a
+plain `out/` folder of HTML/CSS/JS with no server needed. Build it:
+
+```bash
+npm install
+npm run build       # writes ./out
+```
+
+Deploy the `out/` folder to any host:
+
+- **Vercel** — import the repo (Framework: **Next.js**, Root Directory: default
+  `./`). Vercel builds and serves the static output automatically. Or drag the
+  local `out/` folder onto https://vercel.com/new for a zero-config deploy.
+- **Netlify / Cloudflare Pages / GitHub Pages** — publish directory `out`.
+- **Any static host** — upload the contents of `out/`.
+
+Token metadata is served as static files at `/nft/metadata/<id>`
+(`public/nft/metadata/<id>`), and images at `/nft/images/<id>.png`. The
+contract's `baseTokenURI` points at `<site>/nft/metadata/`, so
+`tokenURI(<id>)` = `<site>/nft/metadata/<id>`.
 
 The site has three pages:
 
@@ -155,14 +164,13 @@ cd art
 npm install
 node broker.js            # 15 sample previews -> art/samples/_sheet.png
 node broker.js --all      # all 999 -> public/nft/images/<id>.png
-                          #          + metadata -> data/nft-metadata/<id>
+                          #          + metadata -> public/nft/metadata/<id>
                           #          + art/rarity.json
 ```
 
 - **Images**: `public/nft/images/<id>.png` (served statically).
-- **Metadata**: served as JSON by the route `app/nft/metadata/[id]/route.ts`
-  at `/nft/metadata/<id>`, with the `image` field rewritten to an absolute URL
-  for the requesting host. The contract's `baseTokenURI` points here, so
+- **Metadata**: static JSON files at `public/nft/metadata/<id>`, served at
+  `/nft/metadata/<id>`. The contract's `baseTokenURI` points here, so
   `tokenURI(<id>)` = `<site>/nft/metadata/<id>`.
 - **Traits**: Background, Fur, Eyes, Suit, Tie, Hat, Briefcase — each token is
   deterministic (seeded by id) and de-duplicated so all 999 are unique.
