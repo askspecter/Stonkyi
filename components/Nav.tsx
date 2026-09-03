@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { short } from "@/lib/format";
 
 const links = [
   { href: "/", label: "Home" },
@@ -12,45 +12,67 @@ const links = [
 ];
 
 export function Nav() {
-  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
   return (
-    <header className="sticky top-0 z-30 border-b border-line bg-ink/80 backdrop-blur">
-      <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3">
+    <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-5 sm:pt-4">
+      <div className="mx-auto flex max-w-6xl items-center justify-between rounded-full border border-line bg-coal/70 px-4 py-2.5 backdrop-blur-xl sm:px-5">
         <Link href="/" className="flex items-center gap-2">
-          <Image
-            src="/logo.png"
-            alt="StonkInu"
-            width={32}
-            height={32}
-            priority
-            className="h-8 w-8 rounded-sm shadow-glow"
-          />
-          <span className="text-lg font-black tracking-tight acid-text">
-            STONK<span className="text-gold">INU</span>
-          </span>
+          <span className="serif text-2xl leading-none tracking-tight">StonkInu</span>
+          <span className="text-acid" aria-hidden>🌿</span>
         </Link>
 
-        <nav className="hidden items-center gap-1 md:flex">
-          {links.map((l) => {
-            const active = pathname === l.href;
-            return (
-              <Link
-                key={l.href}
-                href={l.href}
-                className={`rounded-sm px-3 py-1.5 text-sm uppercase tracking-wide transition ${
-                  active
-                    ? "bg-line text-acid"
-                    : "text-acidDim hover:text-acid"
-                }`}
-              >
-                {l.label}
-              </Link>
-            );
-          })}
+        <nav className="hidden items-center gap-6 md:flex">
+          {links.map((l) => (
+            <Link key={l.href} href={l.href} className="label hover:text-acid transition-colors">
+              {l.label}
+            </Link>
+          ))}
         </nav>
 
-        <ConnectButton showBalance={false} chainStatus="icon" />
+        <div className="flex items-center gap-2">
+          <button
+            aria-label="Menu"
+            onClick={() => setOpen((v) => !v)}
+            className="grid h-9 w-9 place-items-center rounded-full border border-line text-mist md:hidden"
+          >
+            <span className="text-lg leading-none">≡</span>
+          </button>
+          <ConnectPill />
+        </div>
       </div>
+
+      {open && (
+        <div className="mx-auto mt-2 max-w-6xl rounded-2xl border border-line bg-coal/90 p-2 backdrop-blur-xl md:hidden">
+          {links.map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              onClick={() => setOpen(false)}
+              className="label block rounded-xl px-4 py-3 hover:bg-panel hover:text-acid"
+            >
+              {l.label}
+            </Link>
+          ))}
+        </div>
+      )}
     </header>
+  );
+}
+
+function ConnectPill() {
+  return (
+    <ConnectButton.Custom>
+      {({ account, chain, openConnectModal, openAccountModal, mounted }) => {
+        const connected = mounted && account && chain;
+        return (
+          <button
+            onClick={connected ? openAccountModal : openConnectModal}
+            className="btn-acid rounded-full px-5 py-2 text-xs"
+          >
+            {connected ? short(account.address) : "Connect"}
+          </button>
+        );
+      }}
+    </ConnectButton.Custom>
   );
 }

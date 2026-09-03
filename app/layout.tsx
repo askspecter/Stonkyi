@@ -3,43 +3,35 @@ import "@rainbow-me/rainbowkit/styles.css";
 import "./globals.css";
 import { Providers } from "./providers";
 import { Nav } from "@/components/Nav";
-import { Ticker } from "@/components/Ticker";
+import { Footer } from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "StonkInu — 999 Broker NFTs",
+  title: "StonkInu — Your broker buys you stocks. You own your broker.",
   description:
-    "999 broker NFTs, each with its own ERC-6551 wallet. Burn $STONKINU, mint a broker, and earn tokenized stock on every mint — automatically.",
+    "999 broker NFTs on-chain. Each is its own ERC-6551 wallet that earns tokenized stock. Burn $STONKINU, mint a broker, and every mint airdrops stock to holders — automatically.",
   openGraph: {
-    title: "StonkInu — 999 Broker NFTs",
-    description:
-      "Burn $STONKINU, mint a broker, earn tokenized stock automatically.",
+    title: "StonkInu",
+    description: "Your broker buys you stocks. You own your broker.",
     images: ["/logo.png"],
   },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="font-mono antialiased">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body>
         <Providers>
-          <Ticker />
           <Nav />
-          <main className="mx-auto w-full max-w-6xl px-4 pb-24 pt-6">
-            {children}
-          </main>
-          <footer className="border-t border-line py-8 text-center text-xs text-acidDim">
-            <p>
-              StonkInu is an experimental, unaudited protocol. Nothing here is
-              financial advice. Do your own research.
-            </p>
-            <p className="mt-2 opacity-60">
-              $STONKINU · 999 brokers · ERC-6551 token-bound accounts
-            </p>
-          </footer>
+          <main>{children}</main>
+          <Footer />
         </Providers>
       </body>
     </html>

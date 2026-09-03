@@ -1,15 +1,19 @@
 import { Hero } from "@/components/Hero";
-import { HowItWorks } from "@/components/HowItWorks";
-import { Features } from "@/components/Features";
-import { BrokerGallery } from "@/components/BrokerGallery";
+import { DeskSim } from "@/components/DeskSim";
+import { Flywheel } from "@/components/Flywheel";
+import { StatsBand } from "@/components/StatsBand";
+import { TradingFloor } from "@/components/TradingFloor";
+import { EnterCTA } from "@/components/EnterCTA";
 
 export default function HomePage() {
   return (
-    <div>
+    <>
       <Hero />
-      <BrokerGallery />
-      <HowItWorks />
-      <Features />
-    </div>
+      <DeskSim />
+      <Flywheel />
+      <StatsBand />
+      <TradingFloor />
+      <EnterCTA />
+    </>
   );
 }

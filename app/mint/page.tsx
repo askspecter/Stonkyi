@@ -2,7 +2,7 @@ import { MintCard } from "@/components/MintCard";
 
 export default function MintPage() {
   return (
-    <div className="grid gap-8 md:grid-cols-2 md:items-start">
+    <div className="mx-auto grid max-w-6xl gap-8 px-5 pb-24 pt-28 md:grid-cols-2 md:items-start">
       <div>
         <h1 className="text-3xl font-black tracking-tight sm:text-4xl">
           Mint <span className="acid-text">StonkInu</span>

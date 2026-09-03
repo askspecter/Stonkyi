@@ -3,61 +3,118 @@
 @tailwind utilities;
 
 :root {
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-serif: "Instrument Serif", Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-sans: "Inter", system-ui, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 html,
 body {
-  background-color: #0a0e0a;
-  color: #d6f5c9;
+  background-color: #07080a;
+  color: #e7ece7;
+  -webkit-font-smoothing: antialiased;
 }
 
 body {
-  background-image:
-    radial-gradient(60rem 60rem at 80% -10%, rgba(125, 255, 77, 0.08), transparent 60%),
-    radial-gradient(50rem 50rem at -10% 20%, rgba(255, 213, 74, 0.05), transparent 55%),
-    linear-gradient(#0a0e0a, #0a0e0a);
-  min-height: 100vh;
-}
-
-/* Faint scanline / grid texture */
-.grid-bg {
-  background-image:
-    linear-gradient(rgba(125, 255, 77, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(125, 255, 77, 0.04) 1px, transparent 1px);
-  background-size: 40px 40px;
-}
-
-.acid-text {
-  color: #7dff4d;
-  text-shadow: 0 0 18px rgba(125, 255, 77, 0.35);
-}
-
-.panel {
-  background: rgba(15, 22, 16, 0.75);
-  border: 1px solid #1c2a1c;
-  backdrop-filter: blur(6px);
-}
-
-.btn-acid {
-  background: #7dff4d;
-  color: #06210a;
-  font-weight: 700;
-  transition: transform 0.08s ease, box-shadow 0.2s ease, filter 0.2s ease;
-}
-.btn-acid:hover:not(:disabled) {
-  box-shadow: 0 0 24px rgba(125, 255, 77, 0.45);
-  filter: brightness(1.05);
-}
-.btn-acid:active:not(:disabled) {
-  transform: translateY(1px);
-}
-.btn-acid:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
 }
 
 ::selection {
-  background: rgba(125, 255, 77, 0.3);
+  background: rgba(200, 242, 78, 0.28);
+}
+
+.serif {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.label {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-size: 11px;
+  color: #8b9591;
+}
+
+/* Subtle diagonal texture used on section panels */
+.hatch {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(255, 255, 255, 0.02) 0px,
+    rgba(255, 255, 255, 0.02) 1px,
+    transparent 1px,
+    transparent 9px
+  );
+}
+
+.glow-ring {
+  box-shadow: 0 0 0 1px rgba(200, 242, 78, 0.25), 0 0 60px rgba(200, 242, 78, 0.12);
+}
+
+.btn-acid {
+  background: #c8f24e;
+  color: #0a0f04;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+  transition: transform 0.12s ease, box-shadow 0.25s ease, filter 0.2s ease;
+}
+.btn-acid:hover {
+  box-shadow: 0 0 34px rgba(200, 242, 78, 0.5);
+  filter: brightness(1.04);
+}
+.btn-acid:active {
+  transform: translateY(1px);
+}
+
+.btn-ghost {
+  border: 1px solid #20262a;
+  color: #cdd6cf;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+.btn-ghost:hover {
+  border-color: rgba(200, 242, 78, 0.5);
+  color: #eafcc0;
+  background: rgba(200, 242, 78, 0.04);
+}
+
+[image-rendering-pixel] {
+  image-rendering: pixelated;
+}
+.pixel {
+  image-rendering: pixelated;
+}
+
+/* Compatibility helpers for the mint / dashboard pages */
+.panel {
+  background: rgba(16, 19, 22, 0.6);
+  border: 1px solid #20262a;
+}
+.acid-text {
+  color: #c8f24e;
+}
+.grid-bg {
+  background-image:
+    linear-gradient(rgba(200, 242, 78, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(200, 242, 78, 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Fade grid background */
+.grid-fade {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
 }

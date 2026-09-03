@@ -2,7 +2,7 @@ import { BrokerDesk } from "@/components/BrokerDesk";
 
 export default function DashboardPage() {
   return (
-    <div>
+    <div className="mx-auto max-w-6xl px-5 pb-24 pt-28">
       <h1 className="text-3xl font-black tracking-tight sm:text-4xl">
         Broker <span className="acid-text">Desk</span>
       </h1>
