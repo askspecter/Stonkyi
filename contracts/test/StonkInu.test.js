@@ -21,13 +21,15 @@ describe("StonkInu protocol", function () {
 
     const MockStockBuyer = await ethers.getContractFactory("MockStockBuyer");
     // Buyer forwards the "buy stock" ETH to `dex` so treasury only reflects the protocol cut.
+    // Single-stock basket keeps the core mechanics tests deterministic.
     const buyer = await MockStockBuyer.deploy(
-      await stock.getAddress(),
+      [await stock.getAddress()],
       STOCK_PER_ETH,
       dex.address,
       deployer.address
     );
     await stock.setMinter(await buyer.getAddress(), true);
+    const stockAddr = await stock.getAddress();
 
     const Registry = await ethers.getContractFactory("ERC6551Registry");
     const registry = await Registry.deploy();
@@ -52,7 +54,7 @@ describe("StonkInu protocol", function () {
       await stonkInu.connect(user).approve(await broker.getAddress(), ethers.MaxUint256);
     }
 
-    return { deployer, treasury, dex, alice, bob, carol, stonkInu, stock, buyer, registry, accountImpl, broker };
+    return { deployer, treasury, dex, alice, bob, carol, stonkInu, stock, stockAddr, buyer, registry, accountImpl, broker };
   }
 
   async function mintBy(broker, user) {
@@ -103,45 +105,45 @@ describe("StonkInu protocol", function () {
 
   describe("stock distribution to holders", function () {
     it("sends the first mint's stock to the treasury (no holders yet)", async function () {
-      const { broker, stock, alice, treasury } = await loadFixture(deployFixture);
+      const { broker, stock, stockAddr, alice, treasury } = await loadFixture(deployFixture);
       await mintBy(broker, alice);
       expect(await stock.balanceOf(treasury.address)).to.equal(STOCK_PER_MINT);
-      expect(await broker.withdrawableStockOf(alice.address)).to.equal(0n);
-      expect(await broker.totalStockDistributed()).to.equal(0n);
+      expect(await broker.withdrawableStockOf(alice.address, stockAddr)).to.equal(0n);
+      expect(await broker.totalStockDistributed(stockAddr)).to.equal(0n);
     });
 
     it("distributes later mints' stock to existing holders, claimable via claim()", async function () {
-      const { broker, stock, alice, bob } = await loadFixture(deployFixture);
+      const { broker, stock, stockAddr, alice, bob } = await loadFixture(deployFixture);
 
       await mintBy(broker, alice); // #1 -> treasury
       await mintBy(broker, bob); // #2 -> alice (sole holder) gets 1 stock
 
-      expect(await broker.totalStockDistributed()).to.equal(STOCK_PER_MINT);
-      expect(await broker.withdrawableStockOf(alice.address)).to.equal(STOCK_PER_MINT);
-      expect(await broker.withdrawableStockOf(bob.address)).to.equal(0n);
+      expect(await broker.totalStockDistributed(stockAddr)).to.equal(STOCK_PER_MINT);
+      expect(await broker.withdrawableStockOf(alice.address, stockAddr)).to.equal(STOCK_PER_MINT);
+      expect(await broker.withdrawableStockOf(bob.address, stockAddr)).to.equal(0n);
 
       await expect(broker.connect(alice).claim())
         .to.emit(broker, "StockClaimed")
-        .withArgs(alice.address, STOCK_PER_MINT);
+        .withArgs(alice.address, stockAddr, STOCK_PER_MINT);
       expect(await stock.balanceOf(alice.address)).to.equal(STOCK_PER_MINT);
-      expect(await broker.withdrawableStockOf(alice.address)).to.equal(0n);
+      expect(await broker.withdrawableStockOf(alice.address, stockAddr)).to.equal(0n);
     });
 
     it("splits a distribution across multiple holders pro-rata", async function () {
-      const { broker, alice, bob, carol } = await loadFixture(deployFixture);
+      const { broker, stockAddr, alice, bob, carol } = await loadFixture(deployFixture);
 
       await mintBy(broker, alice); // #1 -> treasury
       await mintBy(broker, bob); // #2 -> alice gets 1 stock
       await mintBy(broker, carol); // #3 -> alice & bob split 1 stock (0.5 each)
 
       const half = STOCK_PER_MINT / 2n;
-      expect(await broker.withdrawableStockOf(alice.address)).to.equal(STOCK_PER_MINT + half);
-      expect(await broker.withdrawableStockOf(bob.address)).to.equal(half);
-      expect(await broker.withdrawableStockOf(carol.address)).to.equal(0n);
+      expect(await broker.withdrawableStockOf(alice.address, stockAddr)).to.equal(STOCK_PER_MINT + half);
+      expect(await broker.withdrawableStockOf(bob.address, stockAddr)).to.equal(half);
+      expect(await broker.withdrawableStockOf(carol.address, stockAddr)).to.equal(0n);
     });
 
     it("moves unclaimed entitlement with the NFT on transfer", async function () {
-      const { broker, alice, bob, carol } = await loadFixture(deployFixture);
+      const { broker, stockAddr, alice, bob, carol } = await loadFixture(deployFixture);
 
       await mintBy(broker, alice); // #1
       await mintBy(broker, bob); // #2 -> alice accrues 1 stock
@@ -150,19 +152,88 @@ describe("StonkInu protocol", function () {
       await broker.connect(alice).transferFrom(alice.address, carol.address, 1);
 
       // Accrued-so-far stays with alice; future rewards go to carol.
-      expect(await broker.withdrawableStockOf(alice.address)).to.equal(STOCK_PER_MINT);
-      expect(await broker.withdrawableStockOf(carol.address)).to.equal(0n);
+      expect(await broker.withdrawableStockOf(alice.address, stockAddr)).to.equal(STOCK_PER_MINT);
+      expect(await broker.withdrawableStockOf(carol.address, stockAddr)).to.equal(0n);
 
       await mintBy(broker, alice); // #3 -> holders are carol(#1) and bob(#2)
       const half = STOCK_PER_MINT / 2n;
-      expect(await broker.withdrawableStockOf(carol.address)).to.equal(half);
-      expect(await broker.withdrawableStockOf(bob.address)).to.equal(half);
-      expect(await broker.withdrawableStockOf(alice.address)).to.equal(STOCK_PER_MINT);
+      expect(await broker.withdrawableStockOf(carol.address, stockAddr)).to.equal(half);
+      expect(await broker.withdrawableStockOf(bob.address, stockAddr)).to.equal(half);
+      expect(await broker.withdrawableStockOf(alice.address, stockAddr)).to.equal(STOCK_PER_MINT);
     });
 
-    it("reverts claim when nothing is owed", async function () {
-      const { broker, carol } = await loadFixture(deployFixture);
-      await expect(broker.connect(carol).claim()).to.be.revertedWith("nothing to claim");
+    it("reverts claimStock when nothing is owed", async function () {
+      const { broker, stockAddr, carol } = await loadFixture(deployFixture);
+      await expect(broker.connect(carol).claimStock(stockAddr)).to.be.revertedWith("nothing to claim");
+    });
+  });
+
+  describe("random 10-stock basket", function () {
+    async function basketFixture() {
+      const [deployer, treasury, dex, alice, bob] = await ethers.getSigners();
+
+      const StonkInu = await ethers.getContractFactory("StonkInu");
+      const stonkInu = await StonkInu.deploy(deployer.address);
+
+      const StockToken = await ethers.getContractFactory("StockToken");
+      const stocks = [];
+      for (let i = 0; i < 10; i++) {
+        stocks.push(await StockToken.deploy(`Stock${i}`, `STK${i}`, deployer.address));
+      }
+      const stockAddrs = await Promise.all(stocks.map((s) => s.getAddress()));
+
+      const MockStockBuyer = await ethers.getContractFactory("MockStockBuyer");
+      const buyer = await MockStockBuyer.deploy(stockAddrs, STOCK_PER_ETH, dex.address, deployer.address);
+      for (const s of stocks) await s.setMinter(await buyer.getAddress(), true);
+
+      const registry = await (await ethers.getContractFactory("ERC6551Registry")).deploy();
+      const accountImpl = await (await ethers.getContractFactory("ERC6551Account")).deploy();
+
+      const Broker = await ethers.getContractFactory("StonkInuBroker");
+      const broker = await Broker.deploy(
+        await stonkInu.getAddress(),
+        await buyer.getAddress(),
+        await registry.getAddress(),
+        await accountImpl.getAddress(),
+        treasury.address,
+        deployer.address,
+        ""
+      );
+
+      for (const user of [alice, bob]) {
+        await stonkInu.transfer(user.address, ethers.parseEther("500000"));
+        await stonkInu.connect(user).approve(await broker.getAddress(), ethers.MaxUint256);
+      }
+      return { broker, stocks, stockAddrs, alice, bob };
+    }
+
+    it("snapshots all 10 stocks and lets buyStock pick from the whole basket", async function () {
+      const { broker, stockAddrs } = await loadFixture(basketFixture);
+      expect(await broker.stockTokenCount()).to.equal(10n);
+      expect(await broker.stockTokenList()).to.deep.equal(stockAddrs);
+    });
+
+    it("accrues a random stock to the holder and claim() pulls all of it", async function () {
+      const { broker, stocks, alice, bob } = await loadFixture(basketFixture);
+
+      await broker.connect(alice).mint({ value: MINT_PRICE }); // #1 -> treasury
+      await broker.connect(bob).mint({ value: MINT_PRICE }); // #2 -> alice gets 1 stock (random token)
+
+      // Exactly one stock's worth accrued to alice, spread across the basket by token.
+      const [, amounts] = await broker.withdrawableAll(alice.address);
+      const total = amounts.reduce((a, b) => a + b, 0n);
+      expect(total).to.equal(STOCK_PER_MINT);
+
+      await broker.connect(alice).claim();
+
+      // Alice now holds exactly 1 stock total across all basket tokens.
+      let held = 0n;
+      for (const s of stocks) held += await s.balanceOf(alice.address);
+      expect(held).to.equal(STOCK_PER_MINT);
+
+      // Nothing left to withdraw.
+      const [, after] = await broker.withdrawableAll(alice.address);
+      expect(after.reduce((a, b) => a + b, 0n)).to.equal(0n);
     });
   });
 

@@ -2,9 +2,9 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "stock_",
-        "type": "address"
+        "internalType": "address[]",
+        "name": "stocks_",
+        "type": "address[]"
       },
       {
         "internalType": "uint256",
@@ -89,6 +89,12 @@
         "type": "address"
       },
       {
+        "indexed": true,
+        "internalType": "address",
+        "name": "stock",
+        "type": "address"
+      },
+      {
         "indexed": false,
         "internalType": "uint256",
         "name": "ethIn",
@@ -127,6 +133,11 @@
     ],
     "name": "buyStock",
     "outputs": [
+      {
+        "internalType": "address",
+        "name": "stock",
+        "type": "address"
+      },
       {
         "internalType": "uint256",
         "name": "stockAmount",
@@ -184,12 +195,12 @@
   },
   {
     "inputs": [],
-    "name": "stock",
+    "name": "stockCount",
     "outputs": [
       {
-        "internalType": "contract StockToken",
+        "internalType": "uint256",
         "name": "",
-        "type": "address"
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -210,12 +221,12 @@
   },
   {
     "inputs": [],
-    "name": "stockToken",
+    "name": "stockTokens",
     "outputs": [
       {
-        "internalType": "address",
+        "internalType": "address[]",
         "name": "",
-        "type": "address"
+        "type": "address[]"
       }
     ],
     "stateMutability": "view",

@@ -53,44 +53,45 @@ async function main() {
     ? ethers.parseEther(process.env.MIN_STOCK_PER_ETH)
     : 0n;
 
-  // The tokenized stock actually delivered to holders. On a real chain set
-  // STOCK_TOKEN to an existing tokenized-equity token (e.g. Robinhood Chain
-  // TSLA/NVDA) that has a WETH pool; otherwise the buyer targets our StockToken.
-  const STOCK_TOKEN = process.env.STOCK_TOKEN || (await stock.getAddress());
+  // The basket of tokenized stocks the buyer picks from (one at random per mint).
+  // On a real chain set STOCK_TOKENS to a comma-separated list of existing
+  // tokenized-equity tokens (e.g. Robinhood Chain TSLA,NVDA,AMZN,…) that each
+  // have a WETH pool; otherwise the buyer targets our single dev StockToken.
+  const STOCK_TOKENS = (process.env.STOCK_TOKENS || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const basket = STOCK_TOKENS.length > 0 ? STOCK_TOKENS : [await stock.getAddress()];
 
   let buyer;
   let buyerKind;
   if (UNISWAP_ROUTER && WETH) {
-    if (MIN_STOCK_PER_ETH === 0n) {
+    const Buyer = await ethers.getContractFactory("UniswapV3StockBuyer");
+    buyer = await Buyer.deploy(basket, POOL_FEE, WETH, UNISWAP_ROUTER, deployer.address);
+    await buyer.waitForDeployment();
+    // Set a per-token slippage floor when provided (same value for all tokens here).
+    if (MIN_STOCK_PER_ETH > 0n) {
+      for (const t of basket) {
+        await (await buyer.setMinStockPerEth(t, MIN_STOCK_PER_ETH)).wait();
+      }
+    } else {
       console.warn(
-        "\n⚠️  MIN_STOCK_PER_ETH is 0 — NO slippage protection. Every stock buy can be sandwiched to ~0 on a real pool. Set MIN_STOCK_PER_ETH before mainnet.\n"
+        "\n⚠️  MIN_STOCK_PER_ETH is 0 — NO slippage protection. Set MIN_STOCK_PER_ETH (per-token) before mainnet.\n"
       );
     }
-    const Buyer = await ethers.getContractFactory("UniswapV3StockBuyer");
-    buyer = await Buyer.deploy(
-      STOCK_TOKEN,
-      WETH,
-      UNISWAP_ROUTER,
-      POOL_FEE,
-      MIN_STOCK_PER_ETH,
-      deployer.address
-    );
-    await buyer.waitForDeployment();
     buyerKind = "UniswapV3StockBuyer";
     console.log(
-      `Using UniswapV3StockBuyer (stock ${STOCK_TOKEN}, router ${UNISWAP_ROUTER}, WETH ${WETH}, fee ${POOL_FEE})`
+      `Using UniswapV3StockBuyer (basket ${basket.length}, router ${UNISWAP_ROUTER}, WETH ${WETH}, fee ${POOL_FEE})`
     );
   } else {
     const MockStockBuyer = await ethers.getContractFactory("MockStockBuyer");
-    buyer = await MockStockBuyer.deploy(
-      await stock.getAddress(),
-      STOCK_PER_ETH,
-      treasury,
-      deployer.address
-    );
+    buyer = await MockStockBuyer.deploy(basket, STOCK_PER_ETH, treasury, deployer.address);
     await buyer.waitForDeployment();
-    // The mock mints the stock it delivers, so grant it minter rights.
-    await (await stock.setMinter(await buyer.getAddress(), true)).wait();
+    // The mock mints the stock it delivers, so grant it minter rights on each token.
+    for (const t of basket) {
+      const tok = await ethers.getContractAt("StockToken", t);
+      await (await tok.setMinter(await buyer.getAddress(), true)).wait();
+    }
     buyerKind = "MockStockBuyer";
     console.log("Using MockStockBuyer (set UNISWAP_ROUTER + WETH env for the real buyer)");
   }
@@ -118,9 +119,10 @@ async function main() {
   const addresses = {
     chainId,
     StonkInu: await stonkInu.getAddress(),
-    // The stock token holders actually receive (the real tokenized-equity token
-    // when one is configured, otherwise our dev StockToken).
-    StockToken: buyerKind === "UniswapV3StockBuyer" ? STOCK_TOKEN : await stock.getAddress(),
+    // The basket of stock tokens holders can accrue (real tokenized-equity tokens
+    // when configured, otherwise our single dev StockToken).
+    StockTokens: basket,
+    StockToken: basket[0], // representative (back-compat)
     StockBuyer: await buyer.getAddress(),
     stockBuyerKind: buyerKind,
     ERC6551Registry: await registry.getAddress(),
@@ -130,7 +132,7 @@ async function main() {
   };
 
   console.log("\nDeployed addresses:");
-  console.table(addresses);
+  console.table({ ...addresses, StockTokens: basket.join(",") });
 
   const outDir = path.join(__dirname, "..", "..", "config", "deployments");
   fs.mkdirSync(outDir, { recursive: true });

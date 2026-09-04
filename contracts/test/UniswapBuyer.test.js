@@ -25,11 +25,10 @@ describe("UniswapV3StockBuyer (with mock router)", function () {
 
     const Buyer = await ethers.getContractFactory("UniswapV3StockBuyer");
     const buyer = await Buyer.deploy(
-      await stock.getAddress(),
+      [await stock.getAddress()], // single-stock basket
+      3000, // default 0.3% pool fee
       await weth.getAddress(),
       await router.getAddress(),
-      3000, // 0.3% pool fee
-      0, // no slippage floor by default
       deployer.address
     );
 
@@ -66,7 +65,9 @@ describe("UniswapV3StockBuyer (with mock router)", function () {
 
     // Second mint: alice (sole holder) accrues 1 stock, claimable.
     await broker.connect(bob).mint({ value: MINT_PRICE });
-    expect(await broker.withdrawableStockOf(alice.address)).to.equal(STOCK_PER_MINT);
+    expect(await broker.withdrawableStockOf(alice.address, await stock.getAddress())).to.equal(
+      STOCK_PER_MINT
+    );
 
     await broker.connect(alice).claim();
     expect(await stock.balanceOf(alice.address)).to.equal(STOCK_PER_MINT);
@@ -75,19 +76,19 @@ describe("UniswapV3StockBuyer (with mock router)", function () {
     expect(await ethers.provider.getBalance(await buyer.getAddress())).to.equal(0n);
   });
 
-  it("exposes the stock token and swaps ETH directly", async function () {
+  it("exposes the stock basket and swaps ETH directly", async function () {
     const { buyer, stock, alice } = await loadFixture(deployFixture);
-    expect(await buyer.stockToken()).to.equal(await stock.getAddress());
+    expect(await buyer.stockTokens()).to.deep.equal([await stock.getAddress()]);
 
     // Anyone can call buyStock; stock is delivered to the chosen recipient.
     await buyer.connect(alice).buyStock(alice.address, { value: ethers.parseEther("0.001") });
     expect(await stock.balanceOf(alice.address)).to.equal(STOCK_PER_MINT);
   });
 
-  it("enforces the minStockPerEth slippage floor", async function () {
-    const { buyer, alice } = await loadFixture(deployFixture);
+  it("enforces the per-token minStockPerEth slippage floor", async function () {
+    const { buyer, stock, alice } = await loadFixture(deployFixture);
     // Demand 2000 stock/ETH while the pool only gives 1000 -> revert.
-    await buyer.setMinStockPerEth(ethers.parseEther("2000"));
+    await buyer.setMinStockPerEth(await stock.getAddress(), ethers.parseEther("2000"));
     await expect(
       buyer.connect(alice).buyStock(alice.address, { value: ethers.parseEther("0.001") })
     ).to.be.revertedWith("Too little received");

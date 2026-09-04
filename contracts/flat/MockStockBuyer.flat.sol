@@ -727,22 +727,29 @@ pragma solidity ^0.8.24;
 
 /**
  * @title IStockBuyer
- * @notice Pluggable adapter that converts ETH into StockToken.
+ * @notice Pluggable adapter that converts ETH into one of several StockTokens.
  *
- * The StonkInuBroker sends a slice of every mint fee here and receives stock
- * tokens back. Swap out the implementation (mock mint on testnets, Uniswap
- * router on mainnet) without touching the broker contract.
+ * The StonkInuBroker sends a slice of every mint fee here. The buyer picks one
+ * stock from its basket (at random) and returns which token it bought plus the
+ * amount, so the broker can distribute that specific token to holders. Swap out
+ * the implementation (mock mint on testnets, Uniswap router on mainnet) without
+ * touching the broker contract.
  */
 interface IStockBuyer {
-    /// @notice The stock token delivered by {buyStock}.
-    function stockToken() external view returns (address);
+    /// @notice The full, fixed basket of stock tokens this buyer can deliver.
+    function stockTokens() external view returns (address[] memory);
 
     /**
-     * @notice Convert the ETH sent with this call into stock tokens.
+     * @notice Convert the ETH sent with this call into one (randomly chosen)
+     *         stock token from the basket.
      * @param recipient address that receives the purchased stock tokens
-     * @return stockAmount amount of stock tokens delivered to `recipient`
+     * @return stockToken the token that was bought (a member of {stockTokens})
+     * @return stockAmount amount of `stockToken` delivered to `recipient`
      */
-    function buyStock(address recipient) external payable returns (uint256 stockAmount);
+    function buyStock(address recipient)
+        external
+        payable
+        returns (address stockToken, uint256 stockAmount);
 }
 
 
@@ -795,13 +802,14 @@ pragma solidity ^0.8.24;
  * @title MockStockBuyer
  * @notice Self-contained {IStockBuyer} for local dev / testnets.
  *
- * It mints StockToken to the recipient at a fixed rate in exchange for the ETH
- * sent, simulating a DEX swap. The collected ETH is forwarded to a treasury.
+ * It holds a basket of mintable {StockToken}s, picks one at random per call, and
+ * mints it to the recipient at a fixed rate in exchange for the ETH sent —
+ * simulating "swap ETH for a random stock". The ETH is forwarded to a treasury.
  * Replace with a Uniswap-router-backed buyer for mainnet.
  */
 contract MockStockBuyer is IStockBuyer, Ownable {
-    /// @notice The stock token this buyer delivers.
-    StockToken public immutable stock;
+    /// @notice The basket of stock tokens this buyer can deliver.
+    address[] private _stocks;
 
     /// @notice Stock tokens minted per 1 ETH of input (18 decimals).
     uint256 public stockPerEth;
@@ -809,32 +817,51 @@ contract MockStockBuyer is IStockBuyer, Ownable {
     /// @notice Destination for the ETH spent buying stock.
     address public treasury;
 
-    event StockBought(address indexed recipient, uint256 ethIn, uint256 stockOut);
+    uint256 private _nonce;
+
+    event StockBought(address indexed recipient, address indexed stock, uint256 ethIn, uint256 stockOut);
     event RateUpdated(uint256 stockPerEth);
     event TreasuryUpdated(address treasury);
 
-    constructor(address stock_, uint256 stockPerEth_, address treasury_, address owner_)
+    constructor(address[] memory stocks_, uint256 stockPerEth_, address treasury_, address owner_)
         Ownable(owner_)
     {
-        require(stock_ != address(0) && treasury_ != address(0), "zero address");
-        stock = StockToken(stock_);
+        require(stocks_.length > 0, "empty basket");
+        require(treasury_ != address(0), "zero address");
+        for (uint256 i = 0; i < stocks_.length; i++) {
+            require(stocks_[i] != address(0), "zero stock");
+            _stocks.push(stocks_[i]);
+        }
         stockPerEth = stockPerEth_;
         treasury = treasury_;
     }
 
-    function stockToken() external view returns (address) {
-        return address(stock);
+    function stockTokens() external view returns (address[] memory) {
+        return _stocks;
     }
 
-    function buyStock(address recipient) external payable returns (uint256 stockAmount) {
+    function stockCount() external view returns (uint256) {
+        return _stocks.length;
+    }
+
+    function buyStock(address recipient)
+        external
+        payable
+        returns (address stock, uint256 stockAmount)
+    {
         require(msg.value > 0, "no ETH sent");
+        uint256 idx = uint256(
+            keccak256(abi.encodePacked(block.timestamp, block.prevrandao, recipient, _nonce++))
+        ) % _stocks.length;
+        stock = _stocks[idx];
+
         stockAmount = (msg.value * stockPerEth) / 1 ether;
-        stock.mint(recipient, stockAmount);
+        StockToken(stock).mint(recipient, stockAmount);
 
         (bool ok, ) = treasury.call{value: msg.value}("");
         require(ok, "treasury transfer failed");
 
-        emit StockBought(recipient, msg.value, stockAmount);
+        emit StockBought(recipient, stock, msg.value, stockAmount);
     }
 
     function setRate(uint256 stockPerEth_) external onlyOwner {

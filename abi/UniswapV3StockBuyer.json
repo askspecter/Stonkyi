@@ -2,9 +2,14 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "stock_",
-        "type": "address"
+        "internalType": "address[]",
+        "name": "stocks_",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint24",
+        "name": "defaultPoolFee_",
+        "type": "uint24"
       },
       {
         "internalType": "address",
@@ -15,16 +20,6 @@
         "internalType": "address",
         "name": "swapRouter_",
         "type": "address"
-      },
-      {
-        "internalType": "uint24",
-        "name": "poolFee_",
-        "type": "uint24"
-      },
-      {
-        "internalType": "uint256",
-        "name": "minStockPerEth_",
-        "type": "uint256"
       },
       {
         "internalType": "address",
@@ -73,6 +68,25 @@
     "inputs": [
       {
         "indexed": false,
+        "internalType": "uint24",
+        "name": "poolFee",
+        "type": "uint24"
+      }
+    ],
+    "name": "DefaultPoolFeeUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "stock",
+        "type": "address"
+      },
+      {
+        "indexed": false,
         "internalType": "uint256",
         "name": "minStockPerEth",
         "type": "uint256"
@@ -104,6 +118,12 @@
     "anonymous": false,
     "inputs": [
       {
+        "indexed": true,
+        "internalType": "address",
+        "name": "stock",
+        "type": "address"
+      },
+      {
         "indexed": false,
         "internalType": "uint24",
         "name": "poolFee",
@@ -120,6 +140,12 @@
         "indexed": true,
         "internalType": "address",
         "name": "recipient",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "stock",
         "type": "address"
       },
       {
@@ -149,6 +175,11 @@
     "name": "buyStock",
     "outputs": [
       {
+        "internalType": "address",
+        "name": "stock",
+        "type": "address"
+      },
+      {
         "internalType": "uint256",
         "name": "stockAmount",
         "type": "uint256"
@@ -159,7 +190,26 @@
   },
   {
     "inputs": [],
-    "name": "minStockPerEth",
+    "name": "defaultPoolFee",
+    "outputs": [
+      {
+        "internalType": "uint24",
+        "name": "",
+        "type": "uint24"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "minStockPerEthOf",
     "outputs": [
       {
         "internalType": "uint256",
@@ -184,8 +234,14 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "poolFee",
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "poolFeeOf",
     "outputs": [
       {
         "internalType": "uint24",
@@ -206,6 +262,24 @@
   {
     "inputs": [
       {
+        "internalType": "uint24",
+        "name": "poolFee_",
+        "type": "uint24"
+      }
+    ],
+    "name": "setDefaultPoolFee",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "stock",
+        "type": "address"
+      },
+      {
         "internalType": "uint256",
         "name": "minStockPerEth_",
         "type": "uint256"
@@ -219,6 +293,11 @@
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "stock",
+        "type": "address"
+      },
+      {
         "internalType": "uint24",
         "name": "poolFee_",
         "type": "uint24"
@@ -231,12 +310,12 @@
   },
   {
     "inputs": [],
-    "name": "stock",
+    "name": "stockCount",
     "outputs": [
       {
-        "internalType": "contract IERC20",
+        "internalType": "uint256",
         "name": "",
-        "type": "address"
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -244,12 +323,12 @@
   },
   {
     "inputs": [],
-    "name": "stockToken",
+    "name": "stockTokens",
     "outputs": [
       {
-        "internalType": "address",
+        "internalType": "address[]",
         "name": "",
-        "type": "address"
+        "type": "address[]"
       }
     ],
     "stateMutability": "view",

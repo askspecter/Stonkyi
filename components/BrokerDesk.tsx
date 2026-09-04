@@ -16,7 +16,6 @@ export function BrokerDesk() {
   const { address, isConnected } = useAccount();
   const { deployment } = useDeployment();
   const broker = deployment?.StonkInuBroker;
-  const stock = deployment?.StockToken;
 
   const brokerContract = { address: broker, abi: abis.broker } as const;
 
@@ -26,24 +25,23 @@ export function BrokerDesk() {
     args: address ? [address] : undefined,
     query: { enabled: !!broker && !!address },
   });
+  // Every basket stock + the amount the holder can claim of each.
   const claimableQ = useReadContract({
     ...brokerContract,
-    functionName: "withdrawableStockOf",
+    functionName: "withdrawableAll",
     args: address ? [address] : undefined,
     query: { enabled: !!broker && !!address, refetchInterval: 10_000 },
   });
-  const stockSymbolQ = useReadContract({
-    address: stock,
-    abi: abis.stock,
-    functionName: "symbol",
-    query: { enabled: !!stock },
-  });
-  const stockBalQ = useReadContract({
-    address: stock,
-    abi: abis.stock,
-    functionName: "balanceOf",
-    args: address ? [address] : undefined,
-    query: { enabled: !!stock && !!address },
+
+  const [stockAddrs, stockAmounts] = (claimableQ.data as [readonly `0x${string}`[], readonly bigint[]]) ?? [[], []];
+  // Symbols for the stocks that currently have a claimable balance.
+  const earned = stockAddrs
+    .map((addr, i) => ({ addr, amount: stockAmounts[i] ?? 0n }))
+    .filter((s) => s.amount > 0n);
+
+  const symbolsQ = useReadContracts({
+    contracts: earned.map((s) => ({ address: s.addr, abi: abis.stock, functionName: "symbol" as const })),
+    query: { enabled: earned.length > 0 },
   });
 
   const count = Number((balanceQ.data as bigint) ?? 0n);
@@ -94,14 +92,11 @@ export function BrokerDesk() {
   useEffect(() => {
     if (isSuccess) {
       claimableQ.refetch();
-      stockBalQ.refetch();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSuccess]);
 
-  const claimable = (claimableQ.data as bigint) ?? 0n;
-  const stockBal = (stockBalQ.data as bigint) ?? 0n;
-  const symbol = (stockSymbolQ.data as string) ?? "STOCK";
+  const hasClaimable = earned.length > 0;
   const busy = isPending || isMining;
 
   function claim() {
@@ -129,25 +124,42 @@ export function BrokerDesk() {
   return (
     <div className="space-y-6">
       {/* Summary + claim */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2">
         <Stat label="Brokers held" value={count.toString()} />
-        <Stat label={`Claimable ${symbol}`} value={fmtUnits(claimable)} accent="gold" />
-        <Stat label={`${symbol} balance`} value={fmtUnits(stockBal)} />
+        <Stat label="Stocks earned" value={earned.length.toString()} accent="gold" />
       </div>
 
       <div className="panel flex flex-col items-start justify-between gap-4 rounded-lg p-6 sm:flex-row sm:items-center">
-        <div>
+        <div className="min-w-0">
           <div className="text-lg font-bold acid-text">Overtime pay</div>
           <p className="mt-1 text-sm text-acidDim">
-            Claim the tokenized stock your brokers have earned from every mint.
+            Your brokers earn a random mix of tokenized stocks from every mint. Claim them all.
           </p>
+          {hasClaimable && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {earned.map((s, i) => {
+                const sym =
+                  symbolsQ.data?.[i]?.status === "success"
+                    ? (symbolsQ.data[i].result as string)
+                    : short(s.addr);
+                return (
+                  <span
+                    key={s.addr}
+                    className="rounded-full border border-line px-2.5 py-1 font-mono text-xs text-gold"
+                  >
+                    {fmtUnits(s.amount)} {sym}
+                  </span>
+                );
+              })}
+            </div>
+          )}
         </div>
         <button
           onClick={claim}
-          disabled={busy || claimable === 0n}
-          className="btn-acid rounded-sm px-6 py-3 text-sm uppercase tracking-wider"
+          disabled={busy || !hasClaimable}
+          className="btn-acid shrink-0 rounded-sm px-6 py-3 text-sm uppercase tracking-wider"
         >
-          {busy ? "Claiming…" : `Claim ${fmtUnits(claimable)} ${symbol}`}
+          {busy ? "Claiming…" : hasClaimable ? "Claim all" : "Nothing to claim"}
         </button>
       </div>
 

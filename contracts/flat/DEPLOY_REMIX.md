@@ -51,22 +51,30 @@ Catatan: beberapa baris `pragma solidity` (dari OpenZeppelin) itu normal — tin
 - Constructor `initialHolder` = **alamat wallet kamu** (dapat 1.000.000.000 STONKINU).
 - Deploy → catat → `STONKINU`.
 
-## 3. Deploy `UniswapV3StockBuyer` (adapter beli-saham asli)
+## 3. Deploy `UniswapV3StockBuyer` (adapter beli-saham asli, 10 saham acak)
+
+Tiap mint, buyer memilih **1 dari 10 saham secara acak**, lalu swap ETH → saham itu, lalu dibagikan ke holder.
 
 - File `UniswapV3StockBuyer.flat.sol` → kontrak **UniswapV3StockBuyer**.
 - Constructor (urut):
-  - `stock_` = alamat **token saham** (mis. TSLA `0x322F0929c4625eD5bAd873c95208D54E1c003b2d`)
+  - `stocks_` = **array 10 alamat token saham** (format Remix: `["0x...","0x...", … 10 alamat]`).
+    Pilih 10 saham incaranmu (TSLA/NVDA/AMZN/AAPL/MSFT/GOOGL/META/SPY/…) yang punya pool WETH.
+  - `defaultPoolFee_` = fee tier default pool WETH/saham (mis. `3000`). Bisa di-override per token nanti.
   - `weth_` = `0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73`
   - `swapRouter_` = `0xcaf681a66d020601342297493863e78c959e5cb2`
-  - `poolFee_` = fee tier pool WETH/saham (mis. `3000`)
-  - `minStockPerEth_` = **lantai slippage** (18 desimal) — **JANGAN 0** (lihat catatan di bawah)
   - `owner_` = alamat wallet kamu
 - Deploy → catat → `BUYER`.
 
-> **Menghitung `minStockPerEth_`**: ini jumlah minimum token saham per 1 ETH.
-> Kira-kira = (harga ETH ÷ harga 1 token saham) × 10^18, lalu ambil ~90% sebagai lantai.
-> Contoh: kalau 1 ETH ≈ 20 token saham, set lantai ~18 → `18000000000000000000`.
-> Bisa diubah kapan saja lewat `setMinStockPerEth`. **Kalau 0, tiap pembelian bisa di-sandwich MEV sampai ~0.**
+### 3b. (Disarankan) set lantai slippage per token
+
+Default lantai = 0 (tanpa proteksi). Karena tiap saham harganya beda, lantainya **per token**.
+Untuk tiap saham panggil `setMinStockPerEth(stock, minStockPerEth_)`:
+- `stock` = alamat token saham
+- `minStockPerEth_` = jumlah minimum token saham per 1 ETH (18 desimal), ambil ~90% dari kurs pasar.
+  Contoh: kalau 1 ETH ≈ 20 token saham itu, set `18000000000000000000` (18).
+
+> Nilai per-buy cuma 0.001 ETH, jadi risiko sandwich kecil — tapi tetap disarankan set lantai.
+> Kalau pool suatu saham pakai fee tier beda, set `setPoolFee(stock, fee)`.
 
 ## 4. Deploy `ERC6551Registry` (tanpa argumen) → catat `REGISTRY`
 
@@ -102,14 +110,16 @@ Catatan: beberapa baris `pragma solidity` (dari OpenZeppelin) itu normal — tin
 
 ## 8. Sambungkan ke website
 
-Kirim ke saya semua alamat (`STONKINU`, `STOCK_TOKEN`, `BUYER`, `REGISTRY`, `ACCOUNT_IMPL`,
-`BROKER`, `treasury`) — saya isikan ke `config/deployments/4663.json` dan push, lalu tombol
-Mint / Broker Desk langsung nyambung on-chain. (Frontend sudah default ke Robinhood Chain / 4663.)
+Kirim ke saya semua alamat (`STONKINU`, **10 alamat token saham**, `BUYER`, `REGISTRY`,
+`ACCOUNT_IMPL`, `BROKER`, `treasury`) — saya isikan ke `config/deployments/4663.json` dan push,
+lalu tombol Mint / Broker Desk langsung nyambung on-chain (Broker Desk otomatis menampilkan
+campuran saham yang diperoleh tiap holder). Frontend sudah default ke Robinhood Chain / 4663.
 
 ---
 
 ## (Opsional) Hanya untuk uji tanpa saham asli
 
 `MockStockBuyer.flat.sol` mencetak "stock" bikinan sendiri (bukan saham asli). Berguna kalau mau uji
-alur tanpa pool. Constructor: `(stock_, stockPerEth_, treasury_, owner_)`; setelah deploy panggil
-`StockToken.setMinter(BUYER, true)`. Untuk peluncuran sungguhan pakai `UniswapV3StockBuyer` di atas.
+alur tanpa pool. Constructor: `(stocks_[], stockPerEth_, treasury_, owner_)` — `stocks_` array alamat
+StockToken; setelah deploy panggil `StockToken.setMinter(BUYER, true)` di tiap token. Untuk peluncuran
+sungguhan pakai `UniswapV3StockBuyer` di atas.

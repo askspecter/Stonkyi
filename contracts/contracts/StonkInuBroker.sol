@@ -24,13 +24,15 @@ import {IStockBuyer} from "./interfaces/IStockBuyer.sol";
  *   2. Pay 0.002 ETH mint fee
  *
  * ── Automatic fee split (0.002 ETH) ─────────────────────────────────────────
- *   • 0.001 ETH → buy StockToken via the {IStockBuyer} adapter, then distribute
- *                 that stock pro-rata to *existing* broker holders (a dividend).
+ *   • 0.001 ETH → buy stock via the {IStockBuyer} adapter, which picks ONE stock
+ *                 from a fixed basket (at random) and returns it; that stock is
+ *                 distributed pro-rata to *existing* broker holders (a dividend).
  *   • 0.001 ETH → the protocol treasury.
  *
- * Holders accrue stock automatically and pull it whenever they like via {claim}.
- * Stock rewards follow the NFT: transferring a broker transfers its future
- * (unclaimed) stock entitlement, using cumulative dividend accounting.
+ * Holders accrue a mix of the basket's stocks over time and pull them whenever
+ * they like via {claim}. Rewards follow the NFT: transferring a broker transfers
+ * its future (unclaimed) entitlement for every stock, via cumulative dividend
+ * accounting tracked per stock token.
  *
  * On mint the broker's token-bound account is created through the ERC-6551
  * registry, so airdrops and rewards can be sent to the broker itself.
@@ -49,10 +51,12 @@ contract StonkInuBroker is ERC721Enumerable, Ownable, ReentrancyGuard {
     // ─── Immutable protocol wiring ───────────────────────────────────────────
     ERC20Burnable public immutable stonkInu; // token burned on mint
     IStockBuyer public immutable stockBuyer; // ETH → stock adapter
-    IERC20 public immutable stock; // stock token distributed to holders
     IERC6551Registry public immutable registry; // ERC-6551 registry
     address public immutable accountImplementation; // ERC-6551 account impl
     bytes32 public constant ACCOUNT_SALT = bytes32(0);
+
+    /// @notice The fixed basket of stock tokens holders can accrue (snapshot of the buyer's).
+    address[] public stockTokens;
 
     // ─── Mutable config ──────────────────────────────────────────────────────
     address public treasury; // receives PROTOCOL_SHARE (and first-mint stock)
@@ -61,17 +65,17 @@ contract StonkInuBroker is ERC721Enumerable, Ownable, ReentrancyGuard {
     // ─── Supply ──────────────────────────────────────────────────────────────
     uint256 private _nextId; // last minted id (ids are 1-indexed, never reused)
 
-    // ─── Dividend accounting (stock rewards) ─────────────────────────────────
+    // ─── Dividend accounting (per stock token) ───────────────────────────────
     uint256 internal constant MAGNITUDE = 2 ** 128;
-    uint256 public magnifiedStockPerShare;
-    uint256 public totalStockDistributed;
-    mapping(address => int256) internal magnifiedCorrections;
-    mapping(address => uint256) public withdrawnStock;
+    mapping(address => uint256) public magnifiedStockPerShare; // token => magnified/holder
+    mapping(address => uint256) public totalStockDistributed; // token => total handed out
+    mapping(address => mapping(address => int256)) internal magnifiedCorrections; // token => holder => corr
+    mapping(address => mapping(address => uint256)) public withdrawnStock; // token => holder => withdrawn
 
     // ─── Events ──────────────────────────────────────────────────────────────
     event BrokerMinted(address indexed to, uint256 indexed tokenId, address account);
-    event StockDistributed(uint256 stockAmount, uint256 holderSupply);
-    event StockClaimed(address indexed holder, uint256 amount);
+    event StockDistributed(address indexed stock, uint256 stockAmount, uint256 holderSupply);
+    event StockClaimed(address indexed holder, address indexed stock, uint256 amount);
     event TreasuryUpdated(address treasury);
     event BaseURIUpdated(string baseURI);
 
@@ -94,11 +98,28 @@ contract StonkInuBroker is ERC721Enumerable, Ownable, ReentrancyGuard {
         );
         stonkInu = ERC20Burnable(stonkInu_);
         stockBuyer = IStockBuyer(stockBuyer_);
-        stock = IERC20(IStockBuyer(stockBuyer_).stockToken());
         registry = IERC6551Registry(registry_);
         accountImplementation = accountImplementation_;
         treasury = treasury_;
         baseTokenURI = baseTokenURI_;
+
+        // Snapshot the buyer's stock basket so dividend accounting has a fixed set.
+        address[] memory basket = IStockBuyer(stockBuyer_).stockTokens();
+        require(basket.length > 0, "empty basket");
+        for (uint256 i = 0; i < basket.length; i++) {
+            require(basket[i] != address(0), "zero stock");
+            stockTokens.push(basket[i]);
+        }
+    }
+
+    /// @notice Number of distinct stock tokens in the basket.
+    function stockTokenCount() external view returns (uint256) {
+        return stockTokens.length;
+    }
+
+    /// @notice The full basket of stock tokens.
+    function stockTokenList() external view returns (address[] memory) {
+        return stockTokens;
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -119,7 +140,7 @@ contract StonkInuBroker is ERC721Enumerable, Ownable, ReentrancyGuard {
         // 1. Burn $STONKINU from the minter (requires prior approval).
         stonkInu.burnFrom(msg.sender, BURN_AMOUNT);
 
-        // 2. Buy stock with STOCK_SHARE and distribute it to existing holders.
+        // 2. Buy a (random) stock with STOCK_SHARE and distribute it to existing holders.
         _buyAndDistributeStock();
 
         // 3. Forward PROTOCOL_SHARE to the treasury.
@@ -144,44 +165,73 @@ contract StonkInuBroker is ERC721Enumerable, Ownable, ReentrancyGuard {
 
     function _buyAndDistributeStock() internal {
         uint256 holderSupply = totalSupply(); // holders *before* this mint
-        uint256 stockBought = stockBuyer.buyStock{value: STOCK_SHARE}(address(this));
+        (address stock, uint256 stockBought) = stockBuyer.buyStock{value: STOCK_SHARE}(address(this));
 
         if (holderSupply == 0) {
             // No holders yet — the very first mint's stock goes to the treasury.
             if (stockBought > 0) {
-                stock.safeTransfer(treasury, stockBought);
+                IERC20(stock).safeTransfer(treasury, stockBought);
             }
             return;
         }
 
-        magnifiedStockPerShare += (stockBought * MAGNITUDE) / holderSupply;
-        totalStockDistributed += stockBought;
-        emit StockDistributed(stockBought, holderSupply);
+        magnifiedStockPerShare[stock] += (stockBought * MAGNITUDE) / holderSupply;
+        totalStockDistributed[stock] += stockBought;
+        emit StockDistributed(stock, stockBought, holderSupply);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
     // Stock rewards (pull-based)
     // ─────────────────────────────────────────────────────────────────────────
 
-    /// @notice Claim all stock rewards accrued to the caller's brokers.
-    function claim() external nonReentrant returns (uint256 amount) {
-        amount = withdrawableStockOf(msg.sender);
+    /// @notice Claim all accrued rewards across every stock in the basket.
+    function claim() external nonReentrant {
+        address holder = msg.sender;
+        uint256 n = stockTokens.length;
+        for (uint256 i = 0; i < n; i++) {
+            _claimOne(holder, stockTokens[i]);
+        }
+    }
+
+    /// @notice Claim accrued rewards for a single stock token.
+    function claimStock(address stock) external nonReentrant returns (uint256 amount) {
+        amount = _claimOne(msg.sender, stock);
         require(amount > 0, "nothing to claim");
-        withdrawnStock[msg.sender] += amount;
-        stock.safeTransfer(msg.sender, amount);
-        emit StockClaimed(msg.sender, amount);
     }
 
-    /// @notice Stock currently claimable by `holder`.
-    function withdrawableStockOf(address holder) public view returns (uint256) {
-        return cumulativeStockOf(holder) - withdrawnStock[holder];
+    function _claimOne(address holder, address stock) internal returns (uint256 amount) {
+        amount = withdrawableStockOf(holder, stock);
+        if (amount == 0) return 0;
+        withdrawnStock[stock][holder] += amount;
+        IERC20(stock).safeTransfer(holder, amount);
+        emit StockClaimed(holder, stock, amount);
     }
 
-    /// @notice Lifetime stock (claimed + unclaimed) attributable to `holder`.
-    function cumulativeStockOf(address holder) public view returns (uint256) {
-        int256 cumulative = (magnifiedStockPerShare * balanceOf(holder)).toInt256() +
-            magnifiedCorrections[holder];
+    /// @notice Stock of `stock` currently claimable by `holder`.
+    function withdrawableStockOf(address holder, address stock) public view returns (uint256) {
+        return cumulativeStockOf(holder, stock) - withdrawnStock[stock][holder];
+    }
+
+    /// @notice Lifetime `stock` (claimed + unclaimed) attributable to `holder`.
+    function cumulativeStockOf(address holder, address stock) public view returns (uint256) {
+        int256 cumulative = (magnifiedStockPerShare[stock] * balanceOf(holder)).toInt256() +
+            magnifiedCorrections[stock][holder];
         return uint256(cumulative) / MAGNITUDE;
+    }
+
+    /// @notice Convenience: every stock token and the amount `holder` can claim of each.
+    function withdrawableAll(address holder)
+        external
+        view
+        returns (address[] memory tokens, uint256[] memory amounts)
+    {
+        uint256 n = stockTokens.length;
+        tokens = new address[](n);
+        amounts = new uint256[](n);
+        for (uint256 i = 0; i < n; i++) {
+            tokens[i] = stockTokens[i];
+            amounts[i] = withdrawableStockOf(holder, stockTokens[i]);
+        }
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -211,14 +261,18 @@ contract StonkInuBroker is ERC721Enumerable, Ownable, ReentrancyGuard {
     {
         from = super._update(to, tokenId, auth);
 
-        int256 mag = magnifiedStockPerShare.toInt256();
         // `from` loses one share; `to` gains one share. Corrections preserve each
-        // party's already-accrued stock across the transfer.
-        if (from != address(0)) {
-            magnifiedCorrections[from] += mag;
-        }
-        if (to != address(0)) {
-            magnifiedCorrections[to] -= mag;
+        // party's already-accrued stock across the transfer, for every token.
+        uint256 n = stockTokens.length;
+        for (uint256 i = 0; i < n; i++) {
+            address stock = stockTokens[i];
+            int256 mag = magnifiedStockPerShare[stock].toInt256();
+            if (from != address(0)) {
+                magnifiedCorrections[stock][from] += mag;
+            }
+            if (to != address(0)) {
+                magnifiedCorrections[stock][to] -= mag;
+            }
         }
     }
 
