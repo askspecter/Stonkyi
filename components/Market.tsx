@@ -10,46 +10,98 @@ import {
   type ReactNode,
 } from "react";
 import { useReadContracts } from "wagmi";
-import { STOCKS, STOCK_ADDRESSES, type Stock } from "@/lib/stocks";
+import {
+  STOCKS,
+  STOCK_ADDRESSES,
+  AGGREGATOR_ABI,
+  ROBINHOOD_CHAIN_ID,
+  type Stock,
+} from "@/lib/stocks";
 import { abis, useDeployment } from "@/lib/useBroker";
 import { fmtUnits } from "@/lib/format";
 import { Reveal } from "./Reveal";
 
-type Quote = { price: number; changePct: number; dir: 1 | -1 | 0 };
+type Quote = { price: number; changePct: number; dir: 1 | -1 | 0; live: boolean };
 type Market = Record<string, Quote>;
 
 const MarketCtx = createContext<Market>({});
 
-/** Live-feeling price feed: a small random walk seeded near each stock's base. */
+const FEED_STOCKS = STOCKS.filter((s) => s.feed);
+const SIM_STOCKS = STOCKS.filter((s) => !s.feed);
+
+/**
+ * Real on-chain prices: each stock's Chainlink USD feed on Robinhood Chain,
+ * read via `latestRoundData()` (8 decimals). Stocks without a feed fall back to
+ * a gentle simulated walk so the row still moves.
+ */
 export function MarketProvider({ children }: { children: ReactNode }) {
   const [market, setMarket] = useState<Market>(() => {
     const m: Market = {};
-    for (const s of STOCKS) m[s.symbol] = { price: s.base, changePct: 0, dir: 0 };
+    for (const s of STOCKS) m[s.symbol] = { price: s.base, changePct: 0, dir: 0, live: false };
     return m;
   });
-  const openRef = useRef<Record<string, number>>(
-    Object.fromEntries(STOCKS.map((s) => [s.symbol, s.base]))
-  );
+  const openRef = useRef<Record<string, number>>({});
+  const prevRef = useRef<Record<string, number>>({});
+
+  // On-chain Chainlink feeds (USD, 1e8) on Robinhood Chain.
+  const feedsQ = useReadContracts({
+    contracts: FEED_STOCKS.map((s) => ({
+      address: s.feed,
+      abi: AGGREGATOR_ABI,
+      functionName: "latestRoundData" as const,
+      chainId: ROBINHOOD_CHAIN_ID,
+    })),
+    query: { refetchInterval: 12_000 },
+  });
 
   useEffect(() => {
-    const tick = () => {
+    if (!feedsQ.data) return;
+    setMarket((prev) => {
+      const next: Market = { ...prev };
+      FEED_STOCKS.forEach((s, i) => {
+        const r = feedsQ.data![i];
+        if (r?.status !== "success") return;
+        const answer = (r.result as readonly bigint[])[1]; // int256 answer
+        const price = Number(answer) / 1e8;
+        if (!(price > 0)) return;
+        if (openRef.current[s.symbol] === undefined) openRef.current[s.symbol] = price;
+        const open = openRef.current[s.symbol];
+        const before = prevRef.current[s.symbol] ?? price;
+        prevRef.current[s.symbol] = price;
+        next[s.symbol] = {
+          price,
+          changePct: ((price - open) / open) * 100,
+          dir: price > before ? 1 : price < before ? -1 : 0,
+          live: true,
+        };
+      });
+      return next;
+    });
+  }, [feedsQ.data]);
+
+  // Simulated walk for feed-less stocks only.
+  useEffect(() => {
+    if (SIM_STOCKS.length === 0) return;
+    const id = setInterval(() => {
       setMarket((prev) => {
-        const next: Market = {};
-        for (const s of STOCKS) {
+        const next: Market = { ...prev };
+        for (const s of SIM_STOCKS) {
           const cur = prev[s.symbol]?.price ?? s.base;
-          // gentle mean-reverting random walk
           const drift = (s.base - cur) * 0.02;
           const noise = (Math.random() - 0.5) * s.base * 0.004;
           const price = Math.max(0.01, cur + drift + noise);
-          const open = openRef.current[s.symbol] ?? s.base;
-          const changePct = ((price - open) / open) * 100;
-          const dir: 1 | -1 | 0 = price > cur ? 1 : price < cur ? -1 : 0;
-          next[s.symbol] = { price, changePct, dir };
+          if (openRef.current[s.symbol] === undefined) openRef.current[s.symbol] = s.base;
+          const open = openRef.current[s.symbol];
+          next[s.symbol] = {
+            price,
+            changePct: ((price - open) / open) * 100,
+            dir: price > cur ? 1 : price < cur ? -1 : 0,
+            live: false,
+          };
         }
         return next;
       });
-    };
-    const id = setInterval(tick, 1600);
+    }, 1800);
     return () => clearInterval(id);
   }, []);
 
@@ -172,7 +224,8 @@ export function PairedStock() {
           </h2>
           <p className="mt-5 max-w-xl text-base leading-relaxed text-mist">
             Ten tokenized equities on Robinhood Chain. Each mint buys one at random and airdrops it
-            to every broker holder — pro-rata, automatically.
+            to every broker holder — pro-rata, automatically. Prices are read live from{" "}
+            <span className="text-[#e9efe9]">Chainlink</span> on-chain.
           </p>
         </Reveal>
 
