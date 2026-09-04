@@ -681,10 +681,14 @@ interface IStockBuyer {
 pragma solidity ^0.8.24;
 
 /**
- * @title ISwapRouter (Uniswap V3 subset)
- * @notice Minimal interface for the canonical Uniswap V3 SwapRouter
- *         (0xE592427A0AEce92De3Edee1F18E0157C05861564), enough to perform a
- *         single-hop `exactInputSingle` swap.
+ * @title ISwapRouter (Uniswap V3 SwapRouter02 subset)
+ * @notice Minimal interface for Uniswap's SwapRouter02 (a.k.a. IV3SwapRouter),
+ *         enough to perform a single-hop `exactInputSingle` swap.
+ *
+ * @dev SwapRouter02's `ExactInputSingleParams` has NO `deadline` field (unlike
+ *      the original V3 SwapRouter). SwapRouter02 is the router deployed on
+ *      Robinhood Chain and most current Uniswap V3 chains; deadline protection,
+ *      when needed, is applied via the router's `multicall(deadline, data)`.
  */
 interface ISwapRouter {
     struct ExactInputSingleParams {
@@ -692,7 +696,6 @@ interface ISwapRouter {
         address tokenOut;
         uint24 fee;
         address recipient;
-        uint256 deadline;
         uint256 amountIn;
         uint256 amountOutMinimum;
         uint160 sqrtPriceLimitX96;
@@ -785,7 +788,6 @@ contract UniswapV3StockBuyer is IStockBuyer, Ownable {
                 tokenOut: address(stock),
                 fee: poolFee,
                 recipient: recipient,
-                deadline: block.timestamp,
                 amountIn: msg.value,
                 amountOutMinimum: amountOutMinimum,
                 sqrtPriceLimitX96: 0

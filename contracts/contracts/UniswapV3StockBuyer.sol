@@ -79,7 +79,6 @@ contract UniswapV3StockBuyer is IStockBuyer, Ownable {
                 tokenOut: address(stock),
                 fee: poolFee,
                 recipient: recipient,
-                deadline: block.timestamp,
                 amountIn: msg.value,
                 amountOutMinimum: amountOutMinimum,
                 sqrtPriceLimitX96: 0

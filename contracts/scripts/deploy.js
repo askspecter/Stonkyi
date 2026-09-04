@@ -30,22 +30,45 @@ async function main() {
   const stock = await StockToken.deploy("StonkInu Tokenized Stock", "sSTOCK", deployer.address);
   await stock.waitForDeployment();
 
+  // Known Uniswap V3 (SwapRouter02) + WETH addresses per chain, used as defaults
+  // when the corresponding env vars are not set.
+  const CHAIN_DEFAULTS = {
+    // Robinhood Chain (4663): Uniswap V3 SwapRouter02 + WETH9.
+    4663: {
+      router: "0xcaf681a66d020601342297493863e78c959e5cb2",
+      weth: "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73",
+    },
+  };
+  const defaults = CHAIN_DEFAULTS[chainId] || {};
+
   // Choose the ETH -> stock adapter. If a real Uniswap V3 router + WETH are
-  // provided via env, use the production UniswapV3StockBuyer against a live
-  // WETH/stock pool; otherwise fall back to the self-contained mock.
-  const UNISWAP_ROUTER = process.env.UNISWAP_ROUTER || "";
-  const WETH = process.env.WETH || "";
+  // available (via env or per-chain defaults), use the production
+  // UniswapV3StockBuyer against a live WETH/stock pool; otherwise fall back to
+  // the self-contained mock. Set STOCK_TOKEN to the tokenized-stock address to
+  // buy (e.g. a Robinhood Chain NVDA/TSLA token); otherwise our StockToken is used.
+  const UNISWAP_ROUTER = process.env.UNISWAP_ROUTER || defaults.router || "";
+  const WETH = process.env.WETH || defaults.weth || "";
   const POOL_FEE = Number(process.env.POOL_FEE || "3000"); // 0.3% tier
   const MIN_STOCK_PER_ETH = process.env.MIN_STOCK_PER_ETH
     ? ethers.parseEther(process.env.MIN_STOCK_PER_ETH)
     : 0n;
 
+  // The tokenized stock actually delivered to holders. On a real chain set
+  // STOCK_TOKEN to an existing tokenized-equity token (e.g. Robinhood Chain
+  // TSLA/NVDA) that has a WETH pool; otherwise the buyer targets our StockToken.
+  const STOCK_TOKEN = process.env.STOCK_TOKEN || (await stock.getAddress());
+
   let buyer;
   let buyerKind;
   if (UNISWAP_ROUTER && WETH) {
+    if (MIN_STOCK_PER_ETH === 0n) {
+      console.warn(
+        "\n⚠️  MIN_STOCK_PER_ETH is 0 — NO slippage protection. Every stock buy can be sandwiched to ~0 on a real pool. Set MIN_STOCK_PER_ETH before mainnet.\n"
+      );
+    }
     const Buyer = await ethers.getContractFactory("UniswapV3StockBuyer");
     buyer = await Buyer.deploy(
-      await stock.getAddress(),
+      STOCK_TOKEN,
       WETH,
       UNISWAP_ROUTER,
       POOL_FEE,
@@ -54,7 +77,9 @@ async function main() {
     );
     await buyer.waitForDeployment();
     buyerKind = "UniswapV3StockBuyer";
-    console.log(`Using UniswapV3StockBuyer (router ${UNISWAP_ROUTER}, WETH ${WETH}, fee ${POOL_FEE})`);
+    console.log(
+      `Using UniswapV3StockBuyer (stock ${STOCK_TOKEN}, router ${UNISWAP_ROUTER}, WETH ${WETH}, fee ${POOL_FEE})`
+    );
   } else {
     const MockStockBuyer = await ethers.getContractFactory("MockStockBuyer");
     buyer = await MockStockBuyer.deploy(
@@ -93,7 +118,9 @@ async function main() {
   const addresses = {
     chainId,
     StonkInu: await stonkInu.getAddress(),
-    StockToken: await stock.getAddress(),
+    // The stock token holders actually receive (the real tokenized-equity token
+    // when one is configured, otherwise our dev StockToken).
+    StockToken: buyerKind === "UniswapV3StockBuyer" ? STOCK_TOKEN : await stock.getAddress(),
     StockBuyer: await buyer.getAddress(),
     stockBuyerKind: buyerKind,
     ERC6551Registry: await registry.getAddress(),

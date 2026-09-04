@@ -7,6 +7,8 @@ require("@nomicfoundation/hardhat-toolbox");
  *   ETHERSCAN_API_KEY
  */
 const SEPOLIA_RPC_URL = process.env.SEPOLIA_RPC_URL || "";
+const ROBINHOOD_RPC_URL =
+  process.env.ROBINHOOD_RPC_URL || "https://rpc.mainnet.chain.robinhood.com";
 const PRIVATE_KEY = process.env.PRIVATE_KEY || "";
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || "";
 
@@ -27,6 +29,13 @@ module.exports = {
       url: SEPOLIA_RPC_URL,
       accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
       chainId: 11155111,
+    },
+    // Robinhood Chain — public EVM L2 (Arbitrum Orbit). Tokenized stock tokens
+    // (TSLA, NVDA, …) and Uniswap V3/V4 live here, so this is the real target.
+    robinhood: {
+      url: ROBINHOOD_RPC_URL,
+      accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
+      chainId: 4663,
     },
   },
   etherscan: {

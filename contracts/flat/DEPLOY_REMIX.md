@@ -1,133 +1,115 @@
-# Deploy StonkInu di Remix — panduan langkah demi langkah
+# Deploy StonkInu di Remix — Robinhood Chain (beli saham asli)
 
-File flattened (satu file, semua import sudah digabung) ada di folder ini:
+Proyek seperti StonkBrokers/StonkCats jalan di **Robinhood Chain** — L2 publik EVM tempat
+token saham asli (TSLA, NVDA, AMZN, …) hidup sebagai ERC-20 yang bisa diperdagangkan,
+dan Uniswap V3/V4 sudah ada. Di sinilah "mint → otomatis beli saham → bagi ke holder"
+benar-benar bisa jalan.
 
-| File | Kontrak | Untuk |
-|------|---------|-------|
-| `StonkInu.flat.sol` | `StonkInu` | Token $STONKINU (fixed 1B supply) |
-| `StockToken.flat.sol` | `StockToken` | Token "saham" yang dibagikan ke holder |
-| `MockStockBuyer.flat.sol` | `MockStockBuyer` | Adapter beli-stock untuk **testnet** (mint stock sendiri) |
-| `UniswapV3StockBuyer.flat.sol` | `UniswapV3StockBuyer` | Adapter beli-stock **mainnet** (swap lewat Uniswap V3) |
-| `ERC6551Registry.flat.sol` | `ERC6551Registry` | Registry token-bound account |
-| `ERC6551Account.flat.sol` | `ERC6551Account` | Implementasi wallet per-NFT |
-| `StonkInuBroker.flat.sol` | `StonkInuBroker` | Koleksi 999 broker NFT |
-
-> Rekomendasi: coba dulu di **Sepolia (testnet, gratis)** pakai `MockStockBuyer`. Kalau sudah oke baru mainnet.
+File flattened (satu file, semua import digabung) ada di folder ini — tinggal copy-paste ke Remix.
 
 ---
 
-## 0. Setelan compiler Remix (WAJIB sama untuk semua file)
+## 0. Tambah Robinhood Chain ke MetaMask
 
-Di tab **Solidity Compiler**:
-- **Compiler**: `0.8.28` (atau 0.8.24+)
-- **EVM Version**: biarkan default (`cancun`) — cocok untuk mainnet/Sepolia/Base/Arbitrum sekarang.
-- **Enable optimization**: ON, runs `200`.
+| Field | Nilai |
+|-------|-------|
+| Network name | Robinhood Chain |
+| RPC URL | `https://rpc.mainnet.chain.robinhood.com` (atau RPC Alchemy-mu) |
+| Chain ID | `4663` |
+| Currency | `ETH` |
+| Block explorer | `https://robinhoodchain.blockscout.com` |
 
-Di tab **Deploy & Run**:
-- **Environment**: `Injected Provider - MetaMask` (dan pilih jaringan Sepolia di MetaMask).
-- Pastikan wallet punya ETH testnet (faucet Sepolia).
+Isi wallet dengan **ETH di Robinhood Chain** (untuk gas + fee mint).
 
-Catatan: setiap file flat menampilkan beberapa `pragma solidity` (dari OpenZeppelin) — itu normal, tinggal compile.
+## 0b. Alamat kontrak penting di Robinhood Chain (4663)
+
+| Kontrak | Alamat |
+|---------|--------|
+| **WETH9** | `0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73` |
+| **Uniswap V3 SwapRouter02** | `0xcaf681a66d020601342297493863e78c959e5cb2` |
+| Uniswap V3 Factory | `0x1f7d7550b1b028f7571e69a784071f0205fd2efa` |
+| Uniswap V3 QuoterV2 | `0x33e885ed0ec9bf04ecfb19341582aadcb4c8a9e7` |
+| Contoh token saham **TSLA** | `0x322F0929c4625eD5bAd873c95208D54E1c003b2d` |
+
+> Pilih token saham incaranmu (TSLA/NVDA/AMZN/SPY/…). Pastikan ada **pool WETH/<saham>** dan
+> catat **fee tier**-nya (500 = 0.05%, 3000 = 0.3%, 10000 = 1%). Cek di Blockscout / Uniswap.
 
 ---
 
-## 1. Deploy `StonkInu` (token)
+## 1. Setelan compiler Remix (sama untuk semua file)
 
-- Buka `StonkInu.flat.sol`, compile, pilih kontrak **StonkInu**.
-- Constructor:
-  - `initialHolder` = **alamat wallet kamu** (penerima seluruh 1.000.000.000 STONKINU).
-- Deploy → **catat alamatnya** → sebut `STONKINU`.
+Tab **Solidity Compiler**: Compiler `0.8.28`, EVM Version default (`cancun`), optimization ON (runs `200`).
+Tab **Deploy & Run**: Environment `Injected Provider - MetaMask`, jaringan **Robinhood Chain**.
 
-## 2. Deploy `StockToken`
+Catatan: beberapa baris `pragma solidity` (dari OpenZeppelin) itu normal — tinggal compile.
 
-- Compile `StockToken.flat.sol`, pilih **StockToken**.
-- Constructor:
-  - `name_` = `StonkInu Tokenized Stock`
-  - `symbol_` = `sSTOCK`
+---
+
+## 2. Deploy `StonkInu` (token $STONKINU)
+
+- File `StonkInu.flat.sol` → kontrak **StonkInu**.
+- Constructor `initialHolder` = **alamat wallet kamu** (dapat 1.000.000.000 STONKINU).
+- Deploy → catat → `STONKINU`.
+
+## 3. Deploy `UniswapV3StockBuyer` (adapter beli-saham asli)
+
+- File `UniswapV3StockBuyer.flat.sol` → kontrak **UniswapV3StockBuyer**.
+- Constructor (urut):
+  - `stock_` = alamat **token saham** (mis. TSLA `0x322F0929c4625eD5bAd873c95208D54E1c003b2d`)
+  - `weth_` = `0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73`
+  - `swapRouter_` = `0xcaf681a66d020601342297493863e78c959e5cb2`
+  - `poolFee_` = fee tier pool WETH/saham (mis. `3000`)
+  - `minStockPerEth_` = **lantai slippage** (18 desimal) — **JANGAN 0** (lihat catatan di bawah)
   - `owner_` = alamat wallet kamu
-- Deploy → catat → sebut `STOCK`.
+- Deploy → catat → `BUYER`.
 
-## 3. Deploy `MockStockBuyer` (jalur testnet)
+> **Menghitung `minStockPerEth_`**: ini jumlah minimum token saham per 1 ETH.
+> Kira-kira = (harga ETH ÷ harga 1 token saham) × 10^18, lalu ambil ~90% sebagai lantai.
+> Contoh: kalau 1 ETH ≈ 20 token saham, set lantai ~18 → `18000000000000000000`.
+> Bisa diubah kapan saja lewat `setMinStockPerEth`. **Kalau 0, tiap pembelian bisa di-sandwich MEV sampai ~0.**
 
-- Compile `MockStockBuyer.flat.sol`, pilih **MockStockBuyer**.
-- Constructor:
-  - `stock_` = `STOCK` (alamat dari langkah 2)
-  - `stockPerEth_` = `1000000000000000000000`  *(= 1000 × 10^18, artinya 1 ETH → 1000 sSTOCK)*
-  - `treasury_` = alamat wallet kamu
-  - `owner_` = alamat wallet kamu
-- Deploy → catat → sebut `BUYER`.
+## 4. Deploy `ERC6551Registry` (tanpa argumen) → catat `REGISTRY`
 
-## 4. Beri hak mint ke buyer
+## 5. Deploy `ERC6551Account` (tanpa argumen) → catat `ACCOUNT_IMPL`
 
-- Di kontrak **StockToken** (langkah 2) yang muncul di "Deployed Contracts":
-  - panggil `setMinter` dengan:
-    - `minter` = `BUYER`
-    - `allowed` = `true`
-- Kirim transaksi. *(Tanpa ini, mint broker akan gagal saat beli stock.)*
+## 6. Deploy `StonkInuBroker` (kontrak utama)
 
-## 5. Deploy `ERC6551Registry`
-
-- Compile `ERC6551Registry.flat.sol`, pilih **ERC6551Registry**.
-- **Tanpa argumen** → Deploy → catat → sebut `REGISTRY`.
-
-## 6. Deploy `ERC6551Account`
-
-- Compile `ERC6551Account.flat.sol`, pilih **ERC6551Account**.
-- **Tanpa argumen** → Deploy → catat → sebut `ACCOUNT_IMPL`.
-
-## 7. Deploy `StonkInuBroker` (kontrak utama)
-
-- Compile `StonkInuBroker.flat.sol`, pilih **StonkInuBroker**.
+- File `StonkInuBroker.flat.sol` → kontrak **StonkInuBroker**.
 - Constructor (urut):
   - `stonkInu_` = `STONKINU`
   - `stockBuyer_` = `BUYER`
   - `registry_` = `REGISTRY`
   - `accountImplementation_` = `ACCOUNT_IMPL`
-  - `treasury_` = alamat wallet kamu
+  - `treasury_` = alamat wallet kamu (penerima 0.001 ETH/mint)
   - `owner_` = alamat wallet kamu
-  - `baseTokenURI_` = `https://DOMAIN-KAMU.vercel.app/nft/metadata/`  *(pakai domain website live kamu, jangan lupa garis miring di akhir)*
-- Deploy → catat → sebut `BROKER`.
+  - `baseTokenURI_` = `https://DOMAIN-KAMU/nft/metadata/` (domain website live-mu, dengan `/` di akhir)
+- Deploy → catat → `BROKER`.
 
 ---
 
-## 8. Uji mint 1 broker (dari Remix)
+## 7. Uji mint 1 broker
 
-1. Di kontrak **StonkInu**, panggil `approve`:
-   - `spender` = `BROKER`
-   - `value` = `50000000000000000000000`  *(= 50.000 × 10^18)*
-2. Di kontrak **StonkInuBroker**, isi field **VALUE** di atas tombol tulis: `0.002` lalu pilih satuan **Ether** (atau isi `2000000000000000` wei).
-3. Panggil `mint()`.
-4. Berhasil → kamu dapat broker #1, dan token-bound account-nya ter-deploy otomatis.
-   - Cek: `balanceOf(alamatKamu)` = 1, `totalSupply()` = 1.
-   - Stock reward baru mengalir mulai mint **ke-2** dan seterusnya (mint pertama stock-nya ke treasury, sesuai desain).
+1. Kontrak **StonkInu** → `approve(BROKER, 50000000000000000000000)`  *(50.000 × 10^18)*
+2. Kontrak **StonkInuBroker** → isi **VALUE** = `0.002` **Ether**, lalu panggil `mint()`.
+3. Saat mint, kontrak otomatis: swap 0.001 ETH → token saham (via Uniswap) → mulai bagi ke holder,
+   dan 0.001 ETH → treasury. Broker #1 + wallet ERC-6551-nya ter-deploy.
+   - Mint **pertama**: sahamnya ke treasury (belum ada holder lain). Mulai mint **ke-2** baru mengalir ke holder.
 
----
-
-## 9. Sambungkan ke website
-
-Masukkan semua alamat ke `config/deployments/11155111.json` (Sepolia) atau `1.json` (mainnet):
-
-```json
-{
-  "chainId": 11155111,
-  "StonkInu": "STONKINU",
-  "StockToken": "STOCK",
-  "StockBuyer": "BUYER",
-  "stockBuyerKind": "MockStockBuyer",
-  "ERC6551Registry": "REGISTRY",
-  "ERC6551Account": "ACCOUNT_IMPL",
-  "StonkInuBroker": "BROKER",
-  "treasury": "ALAMAT_TREASURY"
-}
-```
-
-Lalu commit → Vercel rebuild → tombol Mint/Broker Desk langsung nyambung on-chain. (Kirim alamat-alamatnya ke saya, saya isikan file JSON-nya.)
+> Kalau `mint()` gagal saat swap: biasanya pool WETH/saham tipis, `poolFee_` salah tier, atau
+> `minStockPerEth_` ketinggian. Sesuaikan `setPoolFee` / `setMinStockPerEth`.
 
 ---
 
-## Untuk MAINNET (baca dulu)
+## 8. Sambungkan ke website
 
-Kalau pakai `UniswapV3StockBuyer` (bukan mock), constructor-nya:
-`(stock_, weth_, swapRouter_, poolFee_, minStockPerEth_, owner_)`
+Kirim ke saya semua alamat (`STONKINU`, `STOCK_TOKEN`, `BUYER`, `REGISTRY`, `ACCOUNT_IMPL`,
+`BROKER`, `treasury`) — saya isikan ke `config/deployments/4663.json` dan push, lalu tombol
+Mint / Broker Desk langsung nyambung on-chain. (Frontend sudah default ke Robinhood Chain / 4663.)
 
-⚠️ **Penting**: `minStockPerEth_` **jangan 0**. Kalau 0, tidak ada proteksi slippage dan setiap pembelian stock 0.001 ETH bisa di-*sandwich* MEV sampai hampir nol. Isi dengan nilai wajar sesuai harga pool (mis. 90% dari kurs pasar). Dan kamu butuh token tokenized-stock asli + pool Uniswap V3 yang ada likuiditasnya. Diskusikan dulu bagian ini sebelum mainnet.
+---
+
+## (Opsional) Hanya untuk uji tanpa saham asli
+
+`MockStockBuyer.flat.sol` mencetak "stock" bikinan sendiri (bukan saham asli). Berguna kalau mau uji
+alur tanpa pool. Constructor: `(stock_, stockPerEth_, treasury_, owner_)`; setelah deploy panggil
+`StockToken.setMinter(BUYER, true)`. Untuk peluncuran sungguhan pakai `UniswapV3StockBuyer` di atas.

@@ -4,6 +4,7 @@ import stonkInuAbi from "@/abi/StonkInu.json";
 import stockAbi from "@/abi/StockToken.json";
 import accountAbi from "@/abi/ERC6551Account.json";
 
+import robinhood from "@/config/deployments/4663.json";
 import sepolia from "@/config/deployments/11155111.json";
 import hardhat from "@/config/deployments/31337.json";
 
@@ -20,6 +21,7 @@ export type Deployment = {
 };
 
 const deployments: Record<number, Deployment> = {
+  4663: robinhood as Deployment,
   11155111: sepolia as Deployment,
   31337: hardhat as Deployment,
 };
@@ -31,9 +33,9 @@ export const abis = {
   account: accountAbi as Abi,
 };
 
-/** The chain the UI targets; override with NEXT_PUBLIC_CHAIN_ID. */
+/** The chain the UI targets; override with NEXT_PUBLIC_CHAIN_ID. Defaults to Robinhood Chain. */
 export const ACTIVE_CHAIN_ID = Number(
-  process.env.NEXT_PUBLIC_CHAIN_ID ?? "11155111"
+  process.env.NEXT_PUBLIC_CHAIN_ID ?? "4663"
 );
 
 const ZERO = "0x0000000000000000000000000000000000000000";
