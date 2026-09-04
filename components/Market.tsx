@@ -201,6 +201,7 @@ export function PairedStock() {
       abi: abis.broker,
       functionName: "totalStockDistributed" as const,
       args: [addr] as const,
+      chainId: ROBINHOOD_CHAIN_ID,
     })),
     query: { enabled: !!broker, refetchInterval: 15_000 },
   });
