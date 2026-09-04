@@ -4,6 +4,7 @@ import stonkInuAbi from "@/abi/StonkInu.json";
 import stockAbi from "@/abi/StockToken.json";
 import accountAbi from "@/abi/ERC6551Account.json";
 import ammAbi from "@/abi/BrokerAMM.json";
+import overtimeAbi from "@/abi/BrokerOvertime.json";
 
 import robinhood from "@/config/deployments/4663.json";
 import sepolia from "@/config/deployments/11155111.json";
@@ -22,6 +23,8 @@ export type Deployment = {
   treasury: `0x${string}`;
   /** BrokerAMM ("Anvil") — the NFT AMM; brokers are traded in $STONKINU. */
   BrokerAMM?: `0x${string}`;
+  /** BrokerOvertime ("Clock In") — stake brokers to earn stock distributions. */
+  BrokerOvertime?: `0x${string}`;
 };
 
 const deployments: Record<number, Deployment> = {
@@ -36,6 +39,7 @@ export const abis = {
   stock: stockAbi as Abi,
   account: accountAbi as Abi,
   amm: ammAbi as Abi,
+  overtime: overtimeAbi as Abi,
 };
 
 /** The chain the UI targets; override with NEXT_PUBLIC_CHAIN_ID. Defaults to Robinhood Chain. */

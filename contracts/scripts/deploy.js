@@ -136,6 +136,15 @@ async function main() {
   // Seed liquidity separately with amm.addLiquidity(ids, tokenAmount) once the
   // owner has broker NFTs to deposit and a $STONKINU reserve to pair.
 
+  // Phase 2 "Clock In": stake brokers here to earn a share of stock distributions.
+  const Overtime = await ethers.getContractFactory("BrokerOvertime");
+  const overtime = await Overtime.deploy(
+    await broker.getAddress(),
+    basket,
+    deployer.address
+  );
+  await overtime.waitForDeployment();
+
   const addresses = {
     chainId,
     StonkInu: await stonkInu.getAddress(),
@@ -150,6 +159,7 @@ async function main() {
     StonkInuBroker: await broker.getAddress(),
     treasury,
     BrokerAMM: await amm.getAddress(),
+    BrokerOvertime: await overtime.getAddress(),
   };
 
   console.log("\nDeployed addresses:");
