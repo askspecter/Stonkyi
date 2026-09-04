@@ -23,7 +23,7 @@ function withSlippage(v: bigint, bps: bigint, up: boolean): bigint {
   return up ? (v * (10_000n + bps)) / 10_000n : (v * (10_000n - bps)) / 10_000n;
 }
 
-export function SwapDesk() {
+export function Anvil() {
   const { address, isConnected } = useAccount();
   const { chainId, deployment } = useDeployment();
   const connectedChainId = useChainId();
@@ -187,7 +187,7 @@ export function SwapDesk() {
   if (!live) {
     return (
       <div className="panel rounded-xl p-8">
-        <div className="text-lg font-bold acid-text">Swap Desk is warming up</div>
+        <div className="text-lg font-bold acid-text">Anvil NFT AMM is warming up</div>
         <p className="mt-2 max-w-md text-sm text-acidDim">
           The $STONKINU token and the Anvil NFT AMM are deploying. Once live, you&apos;ll buy, sell
           and snipe broker NFTs here against $STONKINU with a small ETH fee.
