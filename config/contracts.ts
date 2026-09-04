@@ -3,6 +3,8 @@ import brokerAbi from "@/abi/StonkInuBroker.json";
 import stonkInuAbi from "@/abi/StonkInu.json";
 import stockAbi from "@/abi/StockToken.json";
 import accountAbi from "@/abi/ERC6551Account.json";
+import stonkBrokerAbi from "@/abi/StonkBroker.json";
+import ammAbi from "@/abi/BrokerAMM.json";
 
 import robinhood from "@/config/deployments/4663.json";
 import sepolia from "@/config/deployments/11155111.json";
@@ -19,6 +21,10 @@ export type Deployment = {
   ERC6551Account: `0x${string}`;
   StonkInuBroker: `0x${string}`;
   treasury: `0x${string}`;
+  /** $STONKBROKER — the marketplace trading token (Phase 1 upgrade). */
+  StonkBroker?: `0x${string}`;
+  /** BrokerAMM ("Anvil") — the NFT AMM traded in $STONKBROKER. */
+  BrokerAMM?: `0x${string}`;
 };
 
 const deployments: Record<number, Deployment> = {
@@ -32,6 +38,8 @@ export const abis = {
   stonkInu: stonkInuAbi as Abi,
   stock: stockAbi as Abi,
   account: accountAbi as Abi,
+  stonkBroker: stonkBrokerAbi as Abi,
+  amm: ammAbi as Abi,
 };
 
 /** The chain the UI targets; override with NEXT_PUBLIC_CHAIN_ID. Defaults to Robinhood Chain. */
