@@ -64,16 +64,18 @@ describe("StonkInu protocol", function () {
   describe("token & mint mechanics", function () {
     it("mints a broker, burning 50k STONKINU and taking 0.002 ETH", async function () {
       const { broker, stonkInu, alice } = await loadFixture(deployFixture);
-      const supplyBefore = await stonkInu.totalSupply();
+      const DEAD = "0x000000000000000000000000000000000000dEaD";
       const balBefore = await stonkInu.balanceOf(alice.address);
+      const deadBefore = await stonkInu.balanceOf(DEAD);
 
       await expect(mintBy(broker, alice))
         .to.emit(broker, "BrokerMinted");
 
       expect(await broker.ownerOf(1)).to.equal(alice.address);
       expect(await broker.totalSupply()).to.equal(1n);
+      // 50k pulled from the minter and parked at the dead address.
       expect(await stonkInu.balanceOf(alice.address)).to.equal(balBefore - BURN_AMOUNT);
-      expect(await stonkInu.totalSupply()).to.equal(supplyBefore - BURN_AMOUNT);
+      expect(await stonkInu.balanceOf(DEAD)).to.equal(deadBefore + BURN_AMOUNT);
     });
 
     it("reverts on wrong ETH fee", async function () {

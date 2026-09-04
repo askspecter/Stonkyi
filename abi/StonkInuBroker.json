@@ -436,6 +436,19 @@
   },
   {
     "inputs": [],
+    "name": "BURN_SINK",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "MAX_SUPPLY",
     "outputs": [
       {
@@ -921,7 +934,7 @@
     "name": "stonkInu",
     "outputs": [
       {
-        "internalType": "contract ERC20Burnable",
+        "internalType": "contract IERC20",
         "name": "",
         "type": "address"
       }

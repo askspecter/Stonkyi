@@ -5,7 +5,6 @@ import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {ERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {ERC20Burnable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
@@ -20,7 +19,8 @@ import {IStockBuyer} from "./interfaces/IStockBuyer.sol";
  *
  * ── Minting ────────────────────────────────────────────────────────────────
  * To mint one broker a caller must, in a single transaction:
- *   1. Burn 50,000 $STONKINU   (deflationary — supply is destroyed forever)
+ *   1. Burn 50,000 $STONKINU   (sent to the dead address — out of circulation
+ *                               for good; works with any ERC-20, no burnFrom)
  *   2. Pay 0.002 ETH mint fee
  *
  * ── Automatic fee split (0.002 ETH) ─────────────────────────────────────────
@@ -43,13 +43,18 @@ contract StonkInuBroker is ERC721Enumerable, Ownable, ReentrancyGuard {
 
     // ─── Mint economics ──────────────────────────────────────────────────────
     uint256 public constant MAX_SUPPLY = 999;
-    uint256 public constant BURN_AMOUNT = 50_000 ether; // $STONKINU burned per mint
+    uint256 public constant BURN_AMOUNT = 50_000 ether; // $STONKINU removed per mint
     uint256 public constant MINT_PRICE = 0.002 ether; // ETH fee per mint
     uint256 public constant STOCK_SHARE = 0.001 ether; // → buy stock for holders
     uint256 public constant PROTOCOL_SHARE = 0.001 ether; // → protocol treasury
+    /// @notice Dead address the burned $STONKINU is sent to (provably unspendable).
+    address public constant BURN_SINK = 0x000000000000000000000000000000000000dEaD;
 
     // ─── Immutable protocol wiring ───────────────────────────────────────────
-    ERC20Burnable public immutable stonkInu; // token burned on mint
+    // Any standard ERC-20 works as $STONKINU — the burn is a transfer to the dead
+    // address, so no burnFrom/mint permission on the token is required (this lets
+    // a launchpad token, e.g. Pons on Robinhood Chain, be used directly).
+    IERC20 public immutable stonkInu; // token "burned" (sent to BURN_SINK) on mint
     IStockBuyer public immutable stockBuyer; // ETH → stock adapter
     IERC6551Registry public immutable registry; // ERC-6551 registry
     address public immutable accountImplementation; // ERC-6551 account impl
@@ -96,7 +101,7 @@ contract StonkInuBroker is ERC721Enumerable, Ownable, ReentrancyGuard {
                 treasury_ != address(0),
             "zero address"
         );
-        stonkInu = ERC20Burnable(stonkInu_);
+        stonkInu = IERC20(stonkInu_);
         stockBuyer = IStockBuyer(stockBuyer_);
         registry = IERC6551Registry(registry_);
         accountImplementation = accountImplementation_;
@@ -137,8 +142,9 @@ contract StonkInuBroker is ERC721Enumerable, Ownable, ReentrancyGuard {
         require(totalSupply() < MAX_SUPPLY, "sold out");
         require(msg.value == MINT_PRICE, "wrong ETH fee");
 
-        // 1. Burn $STONKINU from the minter (requires prior approval).
-        stonkInu.burnFrom(msg.sender, BURN_AMOUNT);
+        // 1. "Burn" $STONKINU: pull it from the minter and send it to the dead
+        //    address (requires prior approval). Works with any ERC-20.
+        stonkInu.safeTransferFrom(msg.sender, BURN_SINK, BURN_AMOUNT);
 
         // 2. Buy a (random) stock with STOCK_SHARE and distribute it to existing holders.
         _buyAndDistributeStock();
