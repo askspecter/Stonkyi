@@ -7,7 +7,7 @@ export default function SwapPage() {
         Swap <span className="acid-text">Desk</span>
       </h1>
       <p className="mt-3 max-w-xl text-sm leading-relaxed text-acidDim">
-        Buy, sell, and snipe broker NFTs against $STONKBROKER through the Anvil AMM. Prices follow a
+        Buy, sell, and snipe broker NFTs against $STONKINU through the Anvil AMM. Prices follow a
         constant-product curve — the fewer brokers left in the pool, the more each one costs. A small
         ETH fee per trade funds the protocol; trading fees seed the reward flywheel.
       </p>

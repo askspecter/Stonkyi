@@ -11,11 +11,11 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 /**
  * @title BrokerAMM ("Anvil")
  * @notice A constant-product NFT automated market maker: brokers are bought,
- *         sold and sniped against $STONKBROKER, with a small flat ETH fee per
+ *         sold and sniped against $STONKINU, with a small flat ETH fee per
  *         item that funds the protocol.
  *
  * Pricing follows the classic x*y=k curve on two reserves:
- *   - `tokenReserve`  — $STONKBROKER held by the pool
+ *   - `tokenReserve`  — $STONKINU held by the pool
  *   - `nftCount()`    — how many broker NFTs the pool holds
  *
  * Buying n NFTs removes them from inventory and pushes tokenReserve up; selling
@@ -44,7 +44,7 @@ contract BrokerAMM is Ownable, ReentrancyGuard, IERC721Receiver {
     /// @notice The ERC-20 the pool is priced and traded in.
     IERC20 public immutable token;
 
-    /// @notice $STONKBROKER currently held by the pool (the curve's x reserve).
+    /// @notice $STONKINU currently held by the pool (the curve's x reserve).
     uint256 public tokenReserve;
 
     /// @notice Where the flat per-item ETH fee is forwarded.
@@ -108,19 +108,19 @@ contract BrokerAMM is Ownable, ReentrancyGuard, IERC721Receiver {
     }
 
     /**
-     * @notice $STONKBROKER needed to buy `count` NFTs, fee included.
+     * @notice $STONKINU needed to buy `count` NFTs, fee included.
      * @dev Reverts if the pool can't keep at least one NFT after the trade.
      */
     function quoteBuy(uint256 count) public view returns (uint256 tokenIn) {
         return _quoteBuy(count, false);
     }
 
-    /// @notice $STONKBROKER needed to snipe `count` specific NFTs, fee + premium included.
+    /// @notice $STONKINU needed to snipe `count` specific NFTs, fee + premium included.
     function quoteSnipe(uint256 count) public view returns (uint256 tokenIn) {
         return _quoteBuy(count, true);
     }
 
-    /// @notice $STONKBROKER the seller receives for selling `count` NFTs, fee deducted.
+    /// @notice $STONKINU the seller receives for selling `count` NFTs, fee deducted.
     function quoteSell(uint256 count) public view returns (uint256 tokenOut) {
         require(count > 0, "count = 0");
         uint256 n = nftCount();
@@ -211,10 +211,10 @@ contract BrokerAMM is Ownable, ReentrancyGuard, IERC721Receiver {
     }
 
     /**
-     * @notice Sell brokers into the pool for $STONKBROKER.
+     * @notice Sell brokers into the pool for $STONKINU.
      * @param ids          The tokenIds to sell (caller must own & have approved them).
      * @param minTokenOut  Slippage guard: revert if the payout is below this.
-     * @param to           Recipient of the $STONKBROKER.
+     * @param to           Recipient of the $STONKINU.
      */
     function sell(uint256[] calldata ids, uint256 minTokenOut, address to)
         external

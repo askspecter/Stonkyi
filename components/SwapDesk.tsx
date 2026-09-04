@@ -30,7 +30,7 @@ export function SwapDesk() {
   const { switchChain, isPending: isSwitching } = useSwitchChain();
 
   const amm = deployment?.BrokerAMM;
-  const token = deployment?.StonkBroker;
+  const token = deployment?.StonkInu;
   const nft = deployment?.StonkInuBroker;
   const live = !!amm && amm !== ZERO && !!token && token !== ZERO;
 
@@ -80,12 +80,12 @@ export function SwapDesk() {
 
   // User token balance + allowance.
   const balanceQ = useReadContract({
-    chainId, address: token, abi: abis.stonkBroker, functionName: "balanceOf",
+    chainId, address: token, abi: abis.stonkInu, functionName: "balanceOf",
     args: address ? [address] : undefined,
     query: { enabled: live && !!address, refetchInterval: 12_000 },
   });
   const allowanceQ = useReadContract({
-    chainId, address: token, abi: abis.stonkBroker, functionName: "allowance",
+    chainId, address: token, abi: abis.stonkInu, functionName: "allowance",
     args: address && amm ? [address, amm] : undefined,
     query: { enabled: live && !!address },
   });
@@ -148,7 +148,7 @@ export function SwapDesk() {
   function approveToken() {
     if (!token || !amm) return;
     reset();
-    writeContract({ address: token, abi: abis.stonkBroker, functionName: "approve", args: [amm, maxUint256] });
+    writeContract({ address: token, abi: abis.stonkInu, functionName: "approve", args: [amm, maxUint256] });
   }
   function doBuy() {
     if (!amm || !address) return;
@@ -189,8 +189,8 @@ export function SwapDesk() {
       <div className="panel rounded-xl p-8">
         <div className="text-lg font-bold acid-text">Swap Desk is warming up</div>
         <p className="mt-2 max-w-md text-sm text-acidDim">
-          The $STONKBROKER token and the Anvil NFT AMM are deploying. Once live, you&apos;ll buy, sell
-          and snipe broker NFTs here against $STONKBROKER with a small ETH fee.
+          The $STONKINU token and the Anvil NFT AMM are deploying. Once live, you&apos;ll buy, sell
+          and snipe broker NFTs here against $STONKINU with a small ETH fee.
         </p>
       </div>
     );
@@ -211,8 +211,8 @@ export function SwapDesk() {
       {/* Pool header */}
       <div className="grid gap-4 sm:grid-cols-3">
         <Stat label="In the pool" value={`${nftCount} brokers`} />
-        <Stat label="Reserve" value={`${fmtUnits(reserve, 18, 0)} $SB`} />
-        <Stat label="~ Floor" value={`${fmtUnits(pricePer, 18, 0)} $SB`} accent />
+        <Stat label="Reserve" value={`${fmtUnits(reserve, 18, 0)} $STONKINU`} />
+        <Stat label="~ Floor" value={`${fmtUnits(pricePer, 18, 0)} $STONKINU`} accent />
       </div>
 
       <div className="panel overflow-hidden rounded-xl">
@@ -235,7 +235,7 @@ export function SwapDesk() {
           {tab === "buy" && (
             <>
               <Counter count={count} setCount={setCount} max={Math.max(Number(nftCount) - 1, 0)} />
-              <QuoteRow label="You pay" value={`${fmtUnits(buyCost)} $SB`} sub={`+ ${fmtUnits(ethFee)} ETH fee`} />
+              <QuoteRow label="You pay" value={`${fmtUnits(buyCost)} $STONKINU`} sub={`+ ${fmtUnits(ethFee)} ETH fee`} />
             </>
           )}
 
@@ -259,7 +259,7 @@ export function SwapDesk() {
                   );
                 })}
               </div>
-              <QuoteRow label="You pay" value={`${fmtUnits(snipeCost)} $SB`} sub={`+ ${fmtUnits(ethFeePerItem)} ETH fee · includes snipe premium`} />
+              <QuoteRow label="You pay" value={`${fmtUnits(snipeCost)} $STONKINU`} sub={`+ ${fmtUnits(ethFeePerItem)} ETH fee · includes snipe premium`} />
             </>
           )}
 
@@ -291,12 +291,12 @@ export function SwapDesk() {
                   );
                 })}
               </div>
-              <QuoteRow label="You receive" value={`${fmtUnits(sellOut)} $SB`} sub={`− ${fmtUnits(ethFeePerItem * BigInt(pickedSell.size))} ETH fee`} />
+              <QuoteRow label="You receive" value={`${fmtUnits(sellOut)} $STONKINU`} sub={`− ${fmtUnits(ethFeePerItem * BigInt(pickedSell.size))} ETH fee`} />
             </>
           )}
 
           <div className="flex items-center justify-between text-xs text-acidDim">
-            <span>Your $STONKBROKER</span>
+            <span>Your $STONKINU</span>
             <span className="font-mono text-acid">{fmtUnits(balance)}</span>
           </div>
           <div className="text-[11px] text-acidDim">Swap fee {Number(swapFeeBps) / 100}% stays in the pool.</div>
@@ -318,15 +318,15 @@ export function SwapDesk() {
             )
           ) : needsTokenApproval ? (
             <button onClick={approveToken} disabled={busy || activeCost === 0n} className="btn-acid w-full rounded-md py-3.5 text-sm disabled:opacity-40">
-              {busy ? "Approving…" : "Approve $STONKBROKER"}
+              {busy ? "Approving…" : "Approve $STONKINU"}
             </button>
           ) : tab === "buy" ? (
             <button onClick={doBuy} disabled={busy || count < 1 || buyCost === 0n || balance < buyCost} className="btn-acid w-full rounded-md py-3.5 text-sm disabled:opacity-40">
-              {busy ? "Buying…" : balance < buyCost ? "Insufficient $STONKBROKER" : `Buy ${count} broker${count === 1 ? "" : "s"}`}
+              {busy ? "Buying…" : balance < buyCost ? "Insufficient $STONKINU" : `Buy ${count} broker${count === 1 ? "" : "s"}`}
             </button>
           ) : (
             <button onClick={doSnipe} disabled={busy || pickedSnipe === null || snipeCost === 0n || balance < snipeCost} className="btn-acid w-full rounded-md py-3.5 text-sm disabled:opacity-40">
-              {busy ? "Sniping…" : pickedSnipe === null ? "Pick a broker" : balance < snipeCost ? "Insufficient $STONKBROKER" : `Snipe #${pickedSnipe.toString()}`}
+              {busy ? "Sniping…" : pickedSnipe === null ? "Pick a broker" : balance < snipeCost ? "Insufficient $STONKINU" : `Snipe #${pickedSnipe.toString()}`}
             </button>
           )}
 

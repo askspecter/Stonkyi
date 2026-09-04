@@ -23,7 +23,8 @@ describe("BrokerAMM", function () {
   async function deployFixture() {
     const [deployer, treasury, alice, bob] = await ethers.getSigners();
 
-    const Token = await ethers.getContractFactory("StonkBroker");
+    // Brokers trade against the existing $STONKINU token.
+    const Token = await ethers.getContractFactory("StonkInu");
     const token = await Token.deploy(deployer.address);
 
     const NFT = await ethers.getContractFactory("MockERC721");

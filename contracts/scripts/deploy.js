@@ -116,20 +116,16 @@ async function main() {
   );
   await broker.waitForDeployment();
 
-  // Phase 1 marketplace: $STONKBROKER trading token + the Anvil NFT AMM.
+  // Phase 1 marketplace: the Anvil NFT AMM, trading brokers against $STONKINU.
   // Fees (bps) and the flat per-item ETH fee are overridable via env.
   const AMM_SWAP_FEE_BPS = Number(process.env.AMM_SWAP_FEE_BPS || "200"); // 2%
   const AMM_SNIPE_PREMIUM_BPS = Number(process.env.AMM_SNIPE_PREMIUM_BPS || "500"); // 5%
   const AMM_ETH_FEE = ethers.parseEther(process.env.AMM_ETH_FEE || "0.0005");
 
-  const StonkBroker = await ethers.getContractFactory("StonkBroker");
-  const stonkBroker = await StonkBroker.deploy(deployer.address);
-  await stonkBroker.waitForDeployment();
-
   const AMM = await ethers.getContractFactory("BrokerAMM");
   const amm = await AMM.deploy(
     await broker.getAddress(),
-    await stonkBroker.getAddress(),
+    await stonkInu.getAddress(),
     treasury,
     AMM_SWAP_FEE_BPS,
     AMM_SNIPE_PREMIUM_BPS,
@@ -138,7 +134,7 @@ async function main() {
   );
   await amm.waitForDeployment();
   // Seed liquidity separately with amm.addLiquidity(ids, tokenAmount) once the
-  // owner has broker NFTs to deposit and a $STONKBROKER reserve to pair.
+  // owner has broker NFTs to deposit and a $STONKINU reserve to pair.
 
   const addresses = {
     chainId,
@@ -153,7 +149,6 @@ async function main() {
     ERC6551Account: await accountImpl.getAddress(),
     StonkInuBroker: await broker.getAddress(),
     treasury,
-    StonkBroker: await stonkBroker.getAddress(),
     BrokerAMM: await amm.getAddress(),
   };
 
