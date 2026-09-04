@@ -4,7 +4,7 @@ import { RotatingBroker } from "./RotatingBroker";
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden px-5 pb-20 pt-32 sm:pt-40">
+    <section className="relative overflow-hidden px-5 pb-12 pt-28 sm:pb-20 sm:pt-40">
       {/* atmosphere */}
       <div
         className="glow"
@@ -30,7 +30,7 @@ export function Hero() {
         <Reveal delay={160}>
           <p className="mt-8 max-w-xl text-base leading-relaxed text-mist sm:text-lg">
             Burn <span className="text-[#e9efe9]">$STONKINU</span> to hire a Shiba broker with its own
-            on-chain wallet. Every mint buys tokenized stock and airdrops it to holders — so holding
+            on-chain wallet. Every mint buys tokenized stock and airdrops it to holders, so holding
             the broker holds the book.
           </p>
         </Reveal>
@@ -48,7 +48,7 @@ export function Hero() {
 
         {/* framed example broker */}
         <Reveal delay={320}>
-          <div className="mx-auto mt-16 max-w-[420px]">
+          <div className="mx-auto mt-10 max-w-[420px] sm:mt-14">
             <div className="floaty relative overflow-hidden rounded-3xl border border-line bg-panel/60 p-3">
               <span className="label absolute left-5 top-5 z-10 !text-[10px]">Example</span>
               <RotatingBroker />

@@ -6,9 +6,9 @@ import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "StonkInu — Your broker buys you stocks. You own your broker.",
+  title: "StonkInu · Your broker buys you stocks. You own your broker.",
   description:
-    "999 broker NFTs on-chain. Each is its own ERC-6551 wallet that earns tokenized stock. Burn $STONKINU, mint a broker, and every mint airdrops stock to holders — automatically.",
+    "999 broker NFTs on-chain. Each is its own ERC-6551 wallet that earns tokenized stock. Burn $STONKINU, mint a broker, and every mint airdrops stock to holders, automatically.",
   openGraph: {
     title: "StonkInu",
     description: "Your broker buys you stocks. You own your broker.",

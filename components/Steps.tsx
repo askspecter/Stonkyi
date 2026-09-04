@@ -4,24 +4,24 @@ const STEPS = [
   {
     n: "01",
     title: "Burn to hire",
-    body: "Mint a broker by burning 50,000 $STONKINU and paying a 0.002 ETH desk fee. Every hire destroys supply for good — the collection is deflationary by design.",
+    body: "Mint a broker by burning 50,000 $STONKINU and paying a 0.002 ETH desk fee. Every hire destroys supply for good. The collection is deflationary by design.",
   },
   {
     n: "02",
     title: "The fee splits itself",
-    body: "In the same transaction the desk fee is split on-chain — no admin, no manual step.",
+    body: "In the same transaction the desk fee is split on-chain, with no admin and no manual step.",
     split: true,
   },
   {
     n: "03",
     title: "Claim your stock",
-    body: "Stock accrues to every broker you hold. Pull it any time from the Broker Desk — and since rewards follow the NFT, selling the broker sells the book with it.",
+    body: "Stock accrues to every broker you hold. Pull it any time from the Broker Desk, and since rewards follow the NFT, selling the broker sells the book with it.",
   },
 ];
 
 export function Steps() {
   return (
-    <section id="how" className="relative px-5 py-24 sm:py-32">
+    <section id="how" className="relative px-5 py-14 sm:py-28">
       <div className="mx-auto max-w-5xl">
         <Reveal>
           <div className="label">How the desk works</div>
@@ -33,7 +33,7 @@ export function Steps() {
         <div className="mt-14 divide-y divide-line border-y border-line">
           {STEPS.map((s, i) => (
             <Reveal key={s.n} delay={i * 90}>
-              <div className="grid gap-4 py-8 sm:grid-cols-[auto_1fr] sm:gap-10">
+              <div className="grid gap-3 py-6 sm:grid-cols-[auto_1fr] sm:gap-10 sm:py-8">
                 <div className="label !text-sm text-acid sm:pt-1">{s.n}</div>
                 <div>
                   <h3 className="display text-2xl sm:text-[1.7rem]">{s.title}</h3>

@@ -3,7 +3,7 @@ export type Stock = {
   name: string;
   domain: string; // for the real logo (clearbit)
   address: `0x${string}`; // the tokenized-stock ERC-20 on Robinhood Chain
-  feed?: `0x${string}`; // Chainlink price feed (AggregatorV3, USD, 8 decimals) — omit if none
+  feed?: `0x${string}`; // Chainlink price feed (AggregatorV3, USD, 8 decimals) - omit if none
   base: number; // fallback reference price used until a feed reads / when there is none
   color: string; // brand-ish accent for the fallback monogram
 };
@@ -23,7 +23,7 @@ export const STOCKS: Stock[] = [
   { symbol: "QCOM", name: "Qualcomm", domain: "qualcomm.com", address: "0x0f17206447090e464C277571124dD2688E48AEA9", base: 171.9, color: "#3253dc" },
 ];
 
-/** Chainlink AggregatorV3 minimal ABI — read latest USD price. */
+/** Chainlink AggregatorV3 minimal ABI - read latest USD price. */
 export const AGGREGATOR_ABI = [
   {
     inputs: [],

@@ -9,7 +9,7 @@ export function RotatingBroker() {
   const [i, setI] = useState(0);
 
   useEffect(() => {
-    const id = setInterval(() => setI((v) => (v + 1) % IDS.length), 2000);
+    const id = setInterval(() => setI((v) => (v + 1) % IDS.length), 200);
     return () => clearInterval(id);
   }, []);
 
@@ -21,7 +21,7 @@ export function RotatingBroker() {
           key={id}
           src={`/nft/images/${id}.png`}
           alt="StonkInu broker"
-          className="pixel absolute inset-0 h-full w-full rounded-2xl transition-opacity duration-500"
+          className="pixel absolute inset-0 h-full w-full rounded-2xl"
           style={{ opacity: idx === i ? 1 : 0 }}
           loading="eager"
         />

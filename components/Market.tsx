@@ -178,7 +178,7 @@ function TickerItem({ stock }: { stock: Stock }) {
 export function StockTicker() {
   const row = [...STOCKS, ...STOCKS];
   return (
-    <div className="relative border-y border-line bg-[#080b0a] py-2.5">
+    <div className="relative overflow-hidden border-y border-line bg-[#080b0a] py-2.5">
       <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-[#080b0a] to-transparent" />
       <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-[#080b0a] to-transparent" />
       <div className="flex w-max" style={{ animation: "marquee 38s linear infinite" }}>
@@ -215,7 +215,7 @@ export function PairedStock() {
   }, [distributedQ.data]);
 
   return (
-    <section className="relative px-5 py-24 sm:py-28">
+    <section className="relative px-5 py-14 sm:py-24">
       <div className="mx-auto max-w-5xl">
         <Reveal>
           <div className="label">Paired to holders · live</div>
@@ -224,13 +224,13 @@ export function PairedStock() {
           </h2>
           <p className="mt-5 max-w-xl text-base leading-relaxed text-mist">
             Ten tokenized equities on Robinhood Chain. Each mint buys one at random and airdrops it
-            to every broker holder — pro-rata, automatically. Prices are read live from{" "}
+            to every broker holder, pro-rata and automatic. Prices are read live from{" "}
             <span className="text-[#e9efe9]">Chainlink</span> on-chain.
           </p>
         </Reveal>
 
         <Reveal delay={100}>
-          <div className="mt-12 grid gap-3 sm:grid-cols-2">
+          <div className="mt-8 grid gap-3 sm:mt-12 sm:grid-cols-2">
             {STOCKS.map((s) => (
               <StockRow key={s.symbol} stock={s} paired={distributed[s.symbol] ?? 0n} />
             ))}

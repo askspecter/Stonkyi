@@ -23,7 +23,7 @@ export function Numbers() {
   ];
 
   return (
-    <section className="px-5 py-16">
+    <section className="px-5 py-10 sm:py-16">
       <div className="mx-auto grid max-w-6xl gap-px overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-3">
         {items.map((it, i) => (
           <Reveal key={it.v} delay={i * 80} className="bg-[#0a0d0e]">

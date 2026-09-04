@@ -18,12 +18,12 @@ export default function MintPage() {
           <li>▸ Fixed supply: <span className="text-acid">999 brokers</span>, ever.</li>
           <li>▸ Deflationary: every mint burns $STONKINU for good.</li>
           <li>▸ Passive stock rewards accrue to every broker you hold.</li>
-          <li>▸ Rewards follow the NFT — sell the broker, sell the yield.</li>
+          <li>▸ Rewards follow the NFT. Sell the broker, sell the yield.</li>
         </ul>
 
         <p className="mt-6 rounded-md border border-line bg-ink/50 p-4 text-xs leading-relaxed text-acidDim">
           <span className="text-gold">Two steps:</span> first approve the broker
-          to burn your $STONKINU, then mint. You keep custody the whole time —
+          to burn your $STONKINU, then mint. You keep custody the whole time;
           the contract only pulls the exact 50,000 it burns.
         </p>
       </div>

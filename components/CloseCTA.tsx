@@ -3,7 +3,7 @@ import { Reveal } from "./Reveal";
 
 export function CloseCTA() {
   return (
-    <section className="relative overflow-hidden px-5 py-28 text-center">
+    <section className="relative overflow-hidden px-5 py-16 text-center sm:py-28">
       <div className="aura pointer-events-none absolute inset-x-0 bottom-0 top-auto h-[360px] rotate-180" />
       <Reveal className="relative">
         <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-line bg-coal/60 px-4 py-1.5">

@@ -2,8 +2,8 @@ import { Reveal } from "./Reveal";
 
 export function DeskTerminal() {
   return (
-    <section className="relative px-5 py-24 sm:py-28">
-      <div className="mx-auto grid max-w-5xl items-center gap-12 lg:grid-cols-[0.9fr_1.1fr]">
+    <section className="relative px-5 py-14 sm:py-24">
+      <div className="mx-auto grid max-w-5xl items-center gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
         <Reveal>
           <div>
             <div className="label">Not hired bots</div>
@@ -12,7 +12,7 @@ export function DeskTerminal() {
             </h2>
             <p className="mt-6 max-w-md text-base leading-relaxed text-mist">
               Its own ERC-6551 wallet. Its own book of tokenized stock. Stock is bought on-chain and
-              settled straight to the broker — hold it, and the book is yours.
+              settled straight to the broker. Hold it, and the book is yours.
             </p>
           </div>
         </Reveal>

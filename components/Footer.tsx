@@ -44,7 +44,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="label mt-10 opacity-60">© StonkInu — the desk is open</div>
+        <div className="label mt-10 opacity-60">© StonkInu · the desk is open</div>
       </div>
     </footer>
   );

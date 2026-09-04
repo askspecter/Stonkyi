@@ -36,7 +36,7 @@ function Gem({ active }: { active?: boolean }) {
 
 export function Flywheel() {
   return (
-    <section className="relative overflow-hidden px-5 py-24 sm:py-32">
+    <section className="relative overflow-hidden px-5 py-14 sm:py-28">
       <div
         className="glow"
         style={{ width: 520, height: 520, top: "20%", left: "50%", marginLeft: -260, background: "#1f6b3a", opacity: 0.22 }}
@@ -50,7 +50,7 @@ export function Flywheel() {
         </Reveal>
 
         <Reveal delay={120}>
-          <div className="relative mx-auto mt-16 aspect-square w-full max-w-[440px]">
+          <div className="relative mx-auto mt-12 aspect-square w-full max-w-[440px]">
             {/* rotating dotted ring */}
             <div className="absolute inset-8 animate-spinSlow">
               <svg viewBox="0 0 100 100" className="h-full w-full">

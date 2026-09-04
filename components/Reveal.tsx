@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 /**
- * Lightweight scroll reveal — a CSS transition toggled by IntersectionObserver.
+ * Lightweight scroll reveal - a CSS transition toggled by IntersectionObserver.
  * No animation library, so the bundle stays small.
  */
 export function Reveal({
@@ -28,7 +28,7 @@ export function Reveal({
           io.disconnect();
         }
       },
-      // fire early — start the reveal while the element is still ~18% below the fold
+      // fire early - start the reveal while the element is still ~18% below the fold
       { threshold: 0.01, rootMargin: "0px 0px 18% 0px" }
     );
     io.observe(el);

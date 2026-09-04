@@ -162,7 +162,7 @@ export function MintCard() {
 
           {isSuccess && (
             <p className="rounded-md border border-acid/40 bg-ink/50 p-3 text-xs text-acid">
-              ✓ Confirmed. {needsApproval ? "Approved — now mint." : "Broker hired! Check your Broker Desk."}
+              ✓ Confirmed. {needsApproval ? "Approved. Now mint." : "Broker hired! Check your Broker Desk."}
             </p>
           )}
           {error && (
