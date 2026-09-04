@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Reveal } from "./Reveal";
+import { RotatingBroker } from "./RotatingBroker";
 
 export function Hero() {
   return (
@@ -13,11 +14,11 @@ export function Hero() {
 
       <div className="relative z-[2] mx-auto max-w-5xl">
         <Reveal>
-          <span className="label">999 brokers · ERC-6551 chain</span>
+          <span className="label">999 brokers · Robinhood Chain</span>
         </Reveal>
 
         <Reveal delay={80}>
-          <h1 className="display mt-6 max-w-3xl text-[2.65rem] leading-[1.05] sm:text-6xl lg:text-[4.4rem]">
+          <h1 className="display mt-6 max-w-3xl text-[2.35rem] leading-[1.06] sm:text-6xl lg:text-[4.4rem]">
             A broker NFT that
             <br />
             starts as a <em>trading desk.</em>
@@ -48,14 +49,9 @@ export function Hero() {
         {/* framed example broker */}
         <Reveal delay={320}>
           <div className="mx-auto mt-16 max-w-[420px]">
-            <div className="relative overflow-hidden rounded-3xl border border-line bg-panel/60 p-3">
+            <div className="floaty relative overflow-hidden rounded-3xl border border-line bg-panel/60 p-3">
               <span className="label absolute left-5 top-5 z-10 !text-[10px]">Example</span>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/nft/images/412.png"
-                alt="StonkInu broker"
-                className="pixel floaty aspect-square w-full rounded-2xl"
-              />
+              <RotatingBroker />
             </div>
             <div className="label mt-4 text-center !tracking-[0.28em]">
               999 combinations · rarity is rolled on-chain
