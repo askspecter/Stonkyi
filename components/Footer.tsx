@@ -14,7 +14,7 @@ export function Footer() {
         </p>
 
         <div className="mt-6 flex items-center gap-3 text-mist">
-          <a href="#" aria-label="X" className="grid h-9 w-9 place-items-center rounded-full border border-line hover:border-acid/50 hover:text-acid transition-colors">
+          <a href="https://x.com/stonkinurh" target="_blank" rel="noreferrer" aria-label="X" className="grid h-9 w-9 place-items-center rounded-full border border-line hover:border-acid/50 hover:text-acid transition-colors">
             <XIcon className="h-4 w-4" />
           </a>
         </div>
